@@ -23,6 +23,11 @@
       "Vasoft\\Joke\\Forum\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Vasoft\\Joke\\Forum\\Demo\\": "demo/"
+    }
+  },
   "scripts": {
     "dev": "php -S localhost:8000 -t public/",
     "test": "php vendor/bin/phpunit --display-warnings --exclude-group=skip",

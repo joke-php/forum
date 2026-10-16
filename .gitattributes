@@ -11,6 +11,7 @@
 /public export-ignore
 /routes export-ignore
 /demo export-ignore
+/pages export-ignore
 /config export-ignore
 
 phpunit.xml export-ignore
