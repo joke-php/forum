@@ -9,27 +9,33 @@ use Vasoft\Joke\Templator\TemplatedResponse;
 
 class Controller
 {
-    public function index(ResponseBuilder $builder): TemplatedResponse
+    public function index(ResponseBuilder $builder, string $category = '', string $sub = ''): TemplatedResponse
     {
         /** @var TemplatedResponse $response */
         $response = $builder->makeDefault();
         $response->builder->setTitle('Пример');
+        Data::$categoryFilter = $category;
+        Data::$subFilter = $sub;
+
+        $pager = [];
+        for ($i = 1; $i <= Data::pageCount(); ++$i) {
+            $pager[] = [
+                'active' => 1 === $i,
+                'label' => $i,
+                'link' => '#',
+            ];
+        }
+
+        $context = [
+            'categories' => Data::getCategories(),
+            'items' => Data::getTopics(),
+            'pager' => $pager,
+            'needPager' => count($pager) > 1,
+        ];
 
         return $response->show(
             'pages/forum-index.php',
-            [],
-            0, // ttl: без кэша, удобно на время разработки
-        );
-    }
-    public function book(ResponseBuilder $builder): TemplatedResponse
-    {
-        /** @var TemplatedResponse $response */
-        $response = $builder->makeDefault();
-        $response->builder->setTitle('Пример');
-
-        return $response->show(
-            'pages/forum-book.php',
-            [],
+            $context,
             0, // ttl: без кэша, удобно на время разработки
         );
     }

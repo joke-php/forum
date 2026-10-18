@@ -10,8 +10,9 @@ use Vasoft\Joke\Forum\Demo\Controller;
 /**
  * @var Router $router
  */
-$router->get('/', [Controller::class, 'book']);
-$router->get('/book', [Controller::class, 'book']);
+$router->get('/', static fn(ResponseBuilder $builder) => new Controller()->index($builder));
+$router->get('/{category:slug}', static fn(ResponseBuilder $builder,$category) => new Controller()->index($builder,$category));
+$router->get('/{category:slug}/{sub:slug}', [Controller::class, 'index']);
 $router->get(
     '/{*}',
     static fn(string $path, ResponseBuilder $builder) => $builder->makeDefault()->setStatus(

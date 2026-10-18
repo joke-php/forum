@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c955f441f29fdb936f8c3338bc64be36",
+    "content-hash": "d222e7c98a5188850583bc6a3034b026",
     "packages": [
         {
             "name": "joke-php/avatar",
@@ -51,16 +51,16 @@
         },
         {
             "name": "joke-php/templator",
-            "version": "3.0.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/joke-php/templator.git",
-                "reference": "f1b04686d99cf8c8c2180826942fc88f53c15343"
+                "reference": "19d0091d0b22bdb24ef8ba2d975eaa7a876c398a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/joke-php/templator/zipball/f1b04686d99cf8c8c2180826942fc88f53c15343",
-                "reference": "f1b04686d99cf8c8c2180826942fc88f53c15343",
+                "url": "https://api.github.com/repos/joke-php/templator/zipball/19d0091d0b22bdb24ef8ba2d975eaa7a876c398a",
+                "reference": "19d0091d0b22bdb24ef8ba2d975eaa7a876c398a",
                 "shasum": ""
             },
             "require": {
@@ -75,6 +75,7 @@
                 "phpunit/phpunit": "^13.1",
                 "voral/version-increment": "^3.2"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -94,22 +95,22 @@
             "description": "Templator for Joke micro-framework",
             "support": {
                 "issues": "https://github.com/joke-php/templator/issues",
-                "source": "https://github.com/joke-php/templator/tree/v3.0.0"
+                "source": "https://github.com/joke-php/templator/tree/master"
             },
-            "time": "2026-10-15T07:18:49+00:00"
+            "time": "2026-10-16T05:31:57+00:00"
         },
         {
             "name": "voral/joke",
-            "version": "2.0.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/joke-php/joke.git",
-                "reference": "c0e002edebcc325261e709a80bed4144abb56aab"
+                "reference": "3f266ba1b721e6f8a35a15b2aa649f0b5661d405"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/joke-php/joke/zipball/c0e002edebcc325261e709a80bed4144abb56aab",
-                "reference": "c0e002edebcc325261e709a80bed4144abb56aab",
+                "url": "https://api.github.com/repos/joke-php/joke/zipball/3f266ba1b721e6f8a35a15b2aa649f0b5661d405",
+                "reference": "3f266ba1b721e6f8a35a15b2aa649f0b5661d405",
                 "shasum": ""
             },
             "require": {
@@ -126,6 +127,7 @@
                 "phpunit/phpunit": "^13.1.7",
                 "voral/version-increment": "^3.2"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -145,9 +147,9 @@
             "description": "A minimal PHP microframework with manual routing and dependency injection container.",
             "support": {
                 "issues": "https://github.com/joke-php/joke/issues",
-                "source": "https://github.com/joke-php/joke/tree/v2.0.0"
+                "source": "https://github.com/joke-php/joke/tree/master"
             },
-            "time": "2026-10-15T06:45:07+00:00"
+            "time": "2026-10-16T05:28:49+00:00"
         }
     ],
     "packages-dev": [
@@ -5228,9 +5230,19 @@
             "time": "2025-11-21T07:05:41+00:00"
         }
     ],
-    "aliases": [],
+    "aliases": [
+        {
+            "package": "voral/joke",
+            "version": "9999999-dev",
+            "alias": "2.0.1",
+            "alias_normalized": "2.0.1.0"
+        }
+    ],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "joke-php/templator": 20,
+        "voral/joke": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
