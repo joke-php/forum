@@ -14,6 +14,9 @@ class Controller
         /** @var TemplatedResponse $response */
         $response = $builder->makeDefault();
         $response->builder->setTitle('Пример');
+
+//        $response->builder->
+
         Data::$categoryFilter = $category;
         Data::$subFilter = $sub;
 
