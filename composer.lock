@@ -55,12 +55,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/joke-php/templator.git",
-                "reference": "19d0091d0b22bdb24ef8ba2d975eaa7a876c398a"
+                "reference": "2708200ae85cb59955542c431ec7bd7060abeff6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/joke-php/templator/zipball/19d0091d0b22bdb24ef8ba2d975eaa7a876c398a",
-                "reference": "19d0091d0b22bdb24ef8ba2d975eaa7a876c398a",
+                "url": "https://api.github.com/repos/joke-php/templator/zipball/2708200ae85cb59955542c431ec7bd7060abeff6",
+                "reference": "2708200ae85cb59955542c431ec7bd7060abeff6",
                 "shasum": ""
             },
             "require": {
@@ -97,7 +97,7 @@
                 "issues": "https://github.com/joke-php/templator/issues",
                 "source": "https://github.com/joke-php/templator/tree/master"
             },
-            "time": "2026-10-16T05:31:57+00:00"
+            "time": "2026-10-19T21:17:45+00:00"
         },
         {
             "name": "voral/joke",
@@ -1667,16 +1667,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "13.4.2",
+            "version": "13.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "7b9ba83328f01ce299ef82161720195bd827a4bb"
+                "reference": "2180c47c4229e5da117ff248753370443c074f10"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/7b9ba83328f01ce299ef82161720195bd827a4bb",
-                "reference": "7b9ba83328f01ce299ef82161720195bd827a4bb",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/2180c47c4229e5da117ff248753370443c074f10",
+                "reference": "2180c47c4229e5da117ff248753370443c074f10",
                 "shasum": ""
             },
             "require": {
@@ -1747,7 +1747,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/13.4.2"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/13.4.3"
             },
             "funding": [
                 {
@@ -1755,7 +1755,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-10-12T15:29:04+00:00"
+            "time": "2026-10-16T05:56:47+00:00"
         },
         {
             "name": "psr/container",
