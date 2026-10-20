@@ -10,6 +10,8 @@ use Vasoft\Joke\Container\ServiceContainer;
 use Vasoft\Joke\Contract\Provider\ConfigurableServiceProviderInterface;
 use Vasoft\Joke\Forum\Menu\MenuComponent;
 use Vasoft\Joke\Forum\Menu\MenuConfig;
+use Vasoft\Joke\Forum\Menu\MenuManager;
+use Vasoft\Joke\Forum\Repository\SectionRepository;
 use Vasoft\Joke\Provider\AbstractProvider;
 use Vasoft\Joke\Templator\Component\ComponentCollection;
 
@@ -37,7 +39,8 @@ class ForumProvider extends AbstractProvider implements ConfigurableServiceProvi
 
     public function register(): void
     {
-        // TODO: Implement register() method.
+        $this->serviceContainer->registerSingleton(SectionRepository::class, SectionRepository::class);
+        $this->serviceContainer->registerSingleton(MenuManager::class, MenuManager::class);
     }
 
     public function boot(): void
@@ -49,6 +52,9 @@ class ForumProvider extends AbstractProvider implements ConfigurableServiceProvi
 
     public function provides(): array
     {
-        return [];
+        return [
+            SectionRepository::class,
+            MenuManager::class,
+        ];
     }
 }

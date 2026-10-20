@@ -30,7 +30,9 @@ class MenuComponent extends BaseComponent
      */
     private string $menuName;
 
-    public function __construct(private readonly MenuConfig $config) {}
+    public function __construct(
+        private readonly MenuManager $manager
+    ) {}
 
     public static function vendor(): string
     {
@@ -59,7 +61,7 @@ class MenuComponent extends BaseComponent
 
     protected function getContext(): array
     {
-        $entity = $this->config->get($this->menuName);
+        $entity = $this->manager->get($this->menuName);
         $menu = $this->mapMenu($entity);
         file_put_contents('testik.log', print_r([__METHOD__, $menu], true), FILE_APPEND);
 
