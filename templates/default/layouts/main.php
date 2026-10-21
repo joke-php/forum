@@ -1,6 +1,7 @@
 {% include css __layout.css head %}
 <header>
     <div class="title">Joke Forum</div>
+    {% component vasoft:menu user userMenuConfig %}
 </header>
 <div class="content">
     {% component vasoft:menu forum-side sectionMenuConfig %}

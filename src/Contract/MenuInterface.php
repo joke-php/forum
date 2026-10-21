@@ -25,4 +25,9 @@ interface MenuInterface
     public array $items {
         get;
     }
+
+    /**
+     * Дополнительный контекст для передачи в шаблон.
+     */
+    public function getContext(): array;
 }

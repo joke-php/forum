@@ -92,4 +92,9 @@ class SectionMenu implements MenuInterface
 
         return $entity;
     }
+
+    public function getContext(): array
+    {
+        return [];
+    }
 }

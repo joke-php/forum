@@ -31,7 +31,7 @@ class MenuComponent extends BaseComponent
     private string $menuName;
 
     public function __construct(
-        private readonly MenuManager $manager
+        private readonly MenuManager $manager,
     ) {}
 
     public static function vendor(): string
@@ -63,9 +63,10 @@ class MenuComponent extends BaseComponent
     {
         $entity = $this->manager->get($this->menuName);
         $menu = $this->mapMenu($entity);
-        file_put_contents('testik.log', print_r([__METHOD__, $menu], true), FILE_APPEND);
+        $context = $entity->getContext();
+        $context['items'] = $menu;
 
-        return ['items' => $menu];
+        return $context;
     }
 
     /**
@@ -107,6 +108,7 @@ class MenuComponent extends BaseComponent
         $result = [
             'url' => $item->url,
             'label' => $item->label,
+            'classList' => $item->classList ?? '',
         ];
         if ([] === $item->children) {
             return $result;

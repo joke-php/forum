@@ -31,6 +31,7 @@ class Controller
 
         $context = [
             'sectionMenuConfig' => ['id' => 'sections'],
+            'userMenuConfig' => ['id' => 'user'],
             'categories' => Data::getCategories(),
             'items' => Data::getTopics(),
             'pager' => $pager,

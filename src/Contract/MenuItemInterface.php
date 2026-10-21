@@ -13,6 +13,12 @@ namespace Vasoft\Joke\Forum\Contract;
 interface MenuItemInterface
 {
     /**
+     * @var string Стили пункта меню
+     */
+    public string $classList {
+        get;
+    }
+    /**
      * URL-адрес, связанный с элементом меню.
      */
     public string $url {

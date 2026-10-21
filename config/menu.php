@@ -1,12 +1,11 @@
 <?php
 
 declare(strict_types=1);
+
 use Vasoft\Joke\Forum\Menu\MenuConfig;
 use Vasoft\Joke\Forum\Menu\SectionMenu;
-use Vasoft\Joke\Forum\Repository\SectionRepository;
+use Vasoft\Joke\Forum\Menu\UserMenu;
 
 return new MenuConfig()
-    ->addMenu(
-        'sections',
-        static fn() => new SectionMenu(new SectionRepository()),
-    );
+    ->addMenu('sections', SectionMenu::class)
+    ->addMenu('user', UserMenu::class);

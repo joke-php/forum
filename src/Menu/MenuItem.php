@@ -26,6 +26,7 @@ class MenuItem implements MenuItemInterface
         public readonly string $url,
         public readonly string $label,
         public readonly bool $enabled = true,
+        public readonly string $classList = '',
     ) {}
 
     /**
