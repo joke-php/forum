@@ -65,3 +65,120 @@ a.pager__item:hover {
     color: var(--color-text-primary);
     border: 1px solid var(--color-text-primary);
 }
+
+body.has-popup {
+    overflow: hidden;
+}
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup__shadow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    background-color: var(--popup-overlay-bg);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.popup__box {
+    z-index: 2;
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    border-radius: 4px;
+    background-color: var(--color-bg-primary);
+    width: 400px;
+    max-width: 99%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.popup__head, .popup__footer {
+    padding: 8px;
+    flex-shrink: 0;
+}
+
+.popup__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.popup__footer {
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: 8px;
+    justify-content: right;
+}
+
+.popup__body {
+    padding: 8px;
+    flex-grow: 1;
+    overflow-y: auto;
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+}
+
+.popup__body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.popup__body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.popup__body::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: 3px;
+}
+
+.popup__body::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-text-secondary);
+}
+
+.popup__close {
+    position: relative;
+    aspect-ratio: 1/1;
+    height: 24px;
+    color: var(--color-border);
+    transition: color 0.4s;
+    cursor: pointer;
+}
+
+.popup__close:hover {
+    color: var(--color-text-primary);
+}
+
+.popup__close::after, .popup__close::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 1px;
+    background: currentColor;
+    top: 11px;
+    left: 2px;
+}
+
+.popup__close::after {
+    transform: rotate(45deg);
+}
+
+.popup__close::before {
+    transform: rotate(-45deg);
+}

@@ -24,8 +24,20 @@
     --color-info-bg: #EDF4FC;
     --color-info-text: #005CC5;
     --color-info-border: #6CB6FF;
+    --popup-overlay-bg: rgba(0, 122, 204, 0.15);
 
     --side-menu-size: 56px;
+
+    /* Легкая тень для карточек, кнопок при наведении */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+    /* Стандартная тень для выпадающих списков, активных элементов */
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+    /* Глубокая тень для модальных окон, тултипов */
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 [data-theme="dark"] {
@@ -54,6 +66,13 @@
     --color-info-bg: #1E2A3A;
     --color-info-text: #9CDCFE;
     --color-info-border: #007ACC;
+    --popup-overlay-bg: rgba(0, 122, 204, 0.25);
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5),
+    0 4px 6px -2px rgba(0, 0, 0, 0.3);
 }
 
 * {
