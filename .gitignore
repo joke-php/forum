@@ -7,3 +7,5 @@
 /.zed
 Thumbs.db
 /var
+.env.*
+public/assets
