@@ -54,3 +54,14 @@ CREATE TABLE IF NOT EXISTS user_right
     FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE,
     FOREIGN KEY (right_id) REFERENCES right_item (id) ON DELETE RESTRICT
 );
+
+CREATE TABLE IF NOT EXISTS user_consent
+(
+    id         INT PRIMARY KEY AUTO_INCREMENT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    user_id    INT,
+    ip         VARCHAR(24),
+    url        VARCHAR(256),
+    consent    VARCHAR(64),
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+);

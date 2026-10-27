@@ -13,7 +13,7 @@ VALUES (1, 'Voral'),
        (3, 'Maria'),
        (4, 'Dmitry'),
        (5, 'Elena');
-
+ALTER TABLE forum_user AUTO_INCREMENT 6;
 -- 2. Разделы форума (Categories & Subcategories)
 -- Корневые разделы
 INSERT INTO forum_section (id, name, slug, parent_id, sort, description)
@@ -37,7 +37,7 @@ INSERT INTO forum_section (id, name, slug, parent_id, sort, description)
 VALUES (301, 'Docker', 'docker', 3, 301, 'Контейнеризация приложений'),
        (302, 'CI/CD', 'ci-cd', 3, 302, 'Непрерывная интеграция и доставка'),
        (303, 'Git', 'git', 3, 303, 'Контроль версий');
-
+ALTER TABLE forum_section AUTO_INCREMENT 303;
 -- 3. Топики (Topics)
 -- PHP Topics
 INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, messages, priority)
@@ -88,7 +88,7 @@ INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, 
 VALUES (3008, 'Git flow стратегия', 303, 1, '2026-10-12 09:00:00', '2026-10-14 10:00:00', 3, 500),
        (3009, 'Interactive rebase', 303, 2, '2026-10-11 15:00:00', '2026-10-13 11:00:00', 2, 500),
        (3010, '.gitignore best practices', 303, 4, '2026-10-10 11:00:00', '2026-10-10 11:00:00', 0, 500);
-
+ALTER TABLE forum_section AUTO_INCREMENT 3010;
 -- 4. Сообщения (Messages)
 -- Топик 1001: DI-контейнер
 INSERT INTO forum_messages (topic_id, content, user_id, created_at)

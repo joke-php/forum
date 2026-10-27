@@ -2,26 +2,18 @@
 
 declare(strict_types=1);
 
+use Vasoft\Joke\Forum\Auth\AuthController;
 use Vasoft\Joke\Http\Response\ResponseBuilder;
 use Vasoft\Joke\Http\Response\ResponseStatus;
 use Vasoft\Joke\Routing\Router;
 use Vasoft\Joke\Forum\Demo\Controller;
-use Vasoft\Joke\Db\Sql\ConnectionManager;
 
 /**
  * @var Router $router
  */
-$router->get('/test', static function (ConnectionManager $manager) {
-    $connection = $manager->connection();
-    $iterator = $connection->query('SELECT id, email FROM user limit 10');
-    $data = $iterator->all();
-
-    return print_r(
-        $data,
-        true,
-    );
-});
 $router->get('/', static fn(ResponseBuilder $builder) => new Controller()->index($builder));
+$router->get('/user/register', [AuthController::class, 'registerForm']);
+$router->post('/user/register', [AuthController::class, 'register']);
 $router->get(
     '/{category:slug}',
     static fn(ResponseBuilder $builder, $category) => new Controller()->index($builder, $category),
