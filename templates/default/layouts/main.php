@@ -6,7 +6,9 @@
 <div class="content">
     {% component vasoft:menu forum-side sectionMenuConfig %}
     <main>
+        {% if notFirstLevel %}
         <h1>{%defer page.title%}</h1>
+        {% endif %}
         {%raw __layout.content%}
     </main>
 </div>

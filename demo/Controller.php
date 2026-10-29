@@ -6,6 +6,8 @@ namespace Vasoft\Joke\Forum\Demo;
 
 use Vasoft\Joke\Auth\AuthService;
 use Vasoft\Joke\Auth\Rights\RightsChecker;
+use Vasoft\Joke\Forum\Menu\MenuManager;
+use Vasoft\Joke\Forum\Repository\SectionRepository;
 use Vasoft\Joke\Http\Csrf\CsrfTokenManager;
 use Vasoft\Joke\Http\HttpRequest;
 use Vasoft\Joke\Http\Response\ResponseBuilder;
@@ -20,6 +22,8 @@ readonly class Controller
         private CsrfTokenManager $tokenManager,
         private HttpRequest $request,
         private RightsChecker $rightsChecker,
+        private SectionRepository $sectionRepo,
+        private MenuManager $menuManager,
         AuthService $authService,
     ) {
         $this->user = $authService->getUser();
@@ -36,8 +40,20 @@ readonly class Controller
     {
         /** @var TemplatedResponse $response */
         $response = $builder->makeDefault();
-        $response->builder->setTitle('Пример');
+        $response->builder->setTitle('Форум');
         $response->builder->addMeta('csrf-token', $this->tokenManager->getServerToken($this->request));
+
+
+        $sectionInfo = false;
+        $notFirstLevel = false;
+        if ('' !== $sub) {
+            $sectionInfo = $this->sectionRepo->getSubSectionInfo($category, $sub);
+            $notFirstLevel = true;
+        } elseif ('' !== $category) {
+            $sectionInfo = $this->sectionRepo->getSectionInfo($category);
+            $notFirstLevel = true;
+        }
+        $response->builder->setTitle($sectionInfo['name'] ?? 'Форум');
 
         Data::$categoryFilter = $category;
         Data::$subFilter = $sub;
@@ -50,7 +66,6 @@ readonly class Controller
                 'link' => '#',
             ];
         }
-
 
         $hasNewTopicButton = '' !== $sub && $this->userCan('topic.add');
         $hasNewSubButton = '' === $sub && $this->userCan('section.add');
@@ -65,7 +80,8 @@ readonly class Controller
             'hasNewTopicButton' => $hasNewTopicButton,
             'hasNewSubButton' => $hasNewSubButton,
             'hasToolbar' => $hasNewTopicButton || $hasNewSubButton,
-            'needHeader' => $category !== '' || $sub !== '', // @todo Свойство респонза?
+            'needHeader' => '' !== $category || '' !== $sub, // @todo Свойство респонза?
+            'notFirstLevel' => $notFirstLevel,
         ];
 
         return $response->show(
