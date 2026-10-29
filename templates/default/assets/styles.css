@@ -127,7 +127,7 @@ body.has-popup {
 }
 
 .popup__body {
-    padding: 8px;
+    padding: 16px 8px;
     flex-grow: 1;
     overflow-y: auto;
 

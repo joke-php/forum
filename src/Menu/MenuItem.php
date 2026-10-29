@@ -21,12 +21,14 @@ class MenuItem implements MenuItemInterface
      * @param string $url     URL-адрес для перехода при клике на элемент
      * @param string $label   Текстовая метка (название), отображаемая пользователю
      * @param bool   $enabled Флаг доступности элемента (по умолчанию true)
+     * @param string $id      Идентификатор элемента ссылки пункта меню
      */
     public function __construct(
         public readonly string $url,
         public readonly string $label,
-        public readonly bool $enabled = true,
         public readonly string $classList = '',
+        public readonly string $id = '',
+        public readonly bool $enabled = true,
     ) {}
 
     /**

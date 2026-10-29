@@ -78,11 +78,42 @@ BEGIN
     WHERE id = OLD.topic_id;
 END//
 DELIMITER ;
+# На время разработки возможность перезаписи
+
+delete
+from right_item
+where module = 'forum';
 
 delete
 from role
 where module = 'forum';
-insert into role(module, name, description)
-values ('forum', 'root', 'Администраторы');
-insert into role(module, name, description)
-values ('forum', 'user', 'Пользователи');
+
+INSERT IGNORE INTO role (module, name, description) VALUES ('forum', 'root', 'Администраторы');
+INSERT IGNORE INTO role (module, name, description) VALUES ('forum', 'user', 'Пользователи');
+
+INSERT IGNORE INTO right_item (name, module, description) VALUES ('section.add', 'forum', 'Добавление раздела');
+INSERT IGNORE INTO right_item (name, module, description) VALUES ('topic.add', 'forum', 'Добавление темы');
+
+SET @root_role_id = (SELECT id FROM role WHERE module = 'forum' AND name = 'root' LIMIT 1);
+SET @user_role_id = (SELECT id FROM role WHERE module = 'forum' AND name = 'user' LIMIT 1);
+
+SET @right_section_add = (SELECT id FROM right_item WHERE module = 'forum' AND name = 'section.add' LIMIT 1);
+SET @right_topic_add = (SELECT id FROM right_item WHERE module = 'forum' AND name = 'topic.add' LIMIT 1);
+
+IF @root_role_id IS NULL OR @user_role_id IS NULL THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Roles not found';
+END IF;
+
+IF @right_section_add IS NULL OR @right_topic_add IS NULL THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Rights not found';
+END IF;
+
+INSERT IGNORE INTO role_right (role_id, right_id)
+VALUES (@root_role_id, @right_section_add);
+
+INSERT IGNORE INTO role_right (role_id, right_id)
+VALUES (@user_role_id, @right_topic_add);
+
+INSERT IGNORE INTO user_role (user_id, role_id)
+SELECT u.id, @user_role_id
+FROM user u;

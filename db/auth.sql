@@ -10,6 +10,16 @@ CREATE TABLE IF NOT EXISTS user
     INDEX idx_email (email)
 );
 
+CREATE TABLE IF NOT EXISTS user_remember_token
+(
+    id         INT PRIMARY KEY AUTO_INCREMENT,
+    user_id    INT         NOT NULL,
+    token      VARCHAR(64) NOT NULL UNIQUE,
+    expires_at TIMESTAMP   NOT NULL,
+    INDEX idx_token (token),
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS role
 (
     id          INT PRIMARY KEY AUTO_INCREMENT,
@@ -25,7 +35,7 @@ CREATE TABLE IF NOT EXISTS user_role
     role_id INT NOT NULL,
     PRIMARY KEY (user_id, role_id),
     FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE,
-    FOREIGN KEY (role_id) REFERENCES role (id) ON DELETE RESTRICT
+    FOREIGN KEY (role_id) REFERENCES role (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS right_item
@@ -43,7 +53,7 @@ CREATE TABLE IF NOT EXISTS role_right
     right_id INT NOT NULL,
     PRIMARY KEY (role_id, right_id),
     FOREIGN KEY (role_id) REFERENCES role (id) ON DELETE CASCADE,
-    FOREIGN KEY (right_id) REFERENCES right_item (id) ON DELETE RESTRICT
+    FOREIGN KEY (right_id) REFERENCES right_item (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS user_right
@@ -52,7 +62,7 @@ CREATE TABLE IF NOT EXISTS user_right
     right_id INT NOT NULL,
     PRIMARY KEY (user_id, right_id),
     FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE,
-    FOREIGN KEY (right_id) REFERENCES right_item (id) ON DELETE RESTRICT
+    FOREIGN KEY (right_id) REFERENCES right_item (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS user_consent

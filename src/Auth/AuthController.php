@@ -9,6 +9,7 @@ use Vasoft\Joke\Config\Exceptions\ConfigException;
 use Vasoft\Joke\Container\Exceptions\ContainerException;
 use Vasoft\Joke\Container\Exceptions\ParameterResolveException;
 use Vasoft\Joke\Container\Exceptions\ServiceNotFoundException;
+use Vasoft\Joke\Container\ServiceContainer;
 use Vasoft\Joke\Contract\Mail\TransportInterface;
 use Vasoft\Joke\Db\Sql\ConnectionManager;
 use Vasoft\Joke\Db\Sql\Exceptions\ConnectionException;
@@ -17,7 +18,10 @@ use Vasoft\Joke\Db\Sql\Exceptions\TransactionException;
 use Vasoft\Joke\Exceptions\ConversionException;
 use Vasoft\Joke\Exceptions\FileSystemException;
 use Vasoft\Joke\Forum\Auth\Base\ConsentRepository;
+use Vasoft\Joke\Forum\Auth\Base\CookieAuthenticator;
+use Vasoft\Joke\Forum\Auth\Base\SessionAuthenticator;
 use Vasoft\Joke\Forum\Demo\Data;
+use Vasoft\Joke\Http\Csrf\CsrfTokenManager;
 use Vasoft\Joke\Http\HttpRequest;
 use Vasoft\Joke\Http\Response\JsonResponse;
 use Vasoft\Joke\Http\Response\ResponseBuilder;
@@ -93,7 +97,6 @@ class AuthController
      * @param ConnectionManager   $connections       Менеджер подключений к БД
      * @param ForumUserRepository $repository        Репозиторий пользователей форума
      * @param TransportInterface  $emailTransport    Транспорт для отправки email
-     * @param PasswordHasher      $hasher            Хешер паролей
      * @param Environment         $env               Окружение с конфигурацией
      * @param ConsentRepository   $consentRepository Репозиторий согласий
      *
@@ -119,7 +122,6 @@ class AuthController
         ConnectionManager $connections,
         ForumUserRepository $repository,
         TransportInterface $emailTransport,
-        PasswordHasher $hasher,
         Environment $env,
         ConsentRepository $consentRepository,
     ): TemplatedResponse {
@@ -144,8 +146,7 @@ class AuthController
             /** @var JsonResponse $response */
             try {
                 $password = $this->getPassword();
-                $passwordHash = $hasher->hash($password);
-                $userId = $repository->add($email, $passwordHash, $nickname);
+                $userId = $repository->add($email, $password, $nickname);
                 if ($userId > 0) {
                     $consentRepository->add(
                         $request->server->getClientIp(),
@@ -233,5 +234,83 @@ class AuthController
             ],
             0, // ttl: без кэша, удобно на время разработки
         );
+    }
+
+    public function logout(
+        HttpRequest $request,
+        ResponseBuilder $builder,
+        CookieAuthenticator $cookieAuthenticator,
+        CsrfTokenManager $csrfTokenManager,
+    ): JsonResponse {
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+        $cookieAuthenticator->revokeCurrent($response);
+        $request->session->set(SessionAuthenticator::VAR_USER_DATA, '');
+        $csrfTokenManager->reset($request, $response);
+
+        return $response;
+    }
+
+    /**
+     * Обрабатывает запрос на авторизацию пользователя.
+     *
+     * Проверяет учетные данные (email/password) через репозиторий пользователей.
+     * При успешной аутентификации устанавливает сессию.
+     * Если указан флаг 'remember', дополнительно сохраняет куку с токеном авторизации.
+     *
+     * @param HttpRequest         $request   Текущий HTTP-запрос с данными формы
+     * @param ResponseBuilder     $builder   Фабрика для создания ответов
+     * @param ForumUserRepository $userRepo  Репозиторий для поиска пользователей по credentials
+     * @param ServiceContainer    $container DI-контейнер для получения зависимостей (например, CookieAuthenticator)
+     *
+     * @return JsonResponse JSON-ответ со статусом операции и списком ошибок (если есть)
+     *
+     * @throws ContainerException        Если произошла общая ошибка контейнера
+     * @throws ParameterResolveException Если не удалось разрешить параметры зависимостей
+     * @throws ServiceNotFoundException  Если сервис (например, CookieAuthenticator) не зарегистрирован
+     * @throws ConversionException       Если возникла ошибка конвертации данных (редко, зависит от реализации)
+     */
+    public function auth(
+        HttpRequest $request,
+        ResponseBuilder $builder,
+        ForumUserRepository $userRepo,
+        ServiceContainer $container,
+    ): JsonResponse {
+        $email = trim(strip_tags($request->post->getString('login', '')));
+        $password = trim(strip_tags($request->post->getString('password', '')));
+        $remember = trim(strip_tags($request->post->getString('remember', '')));
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+
+        $errors = [];
+        if (empty($email) || empty($password)) {
+            $errors[] = 'Все поля обязательны';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Введен не корректны адрес электронной почты';
+        }
+        if ([] === $errors) {
+            $user = $userRepo->getByEmailAndPassword($email, $password);
+            if (null === $user) {
+                $errors[] = 'Пользователь с таким именем и паролем не существует';
+            } else {
+                $request->session->set(SessionAuthenticator::VAR_USER_DATA, $user->id);
+                if ('ok' === $remember) {
+                    /** @var CookieAuthenticator $authenticator */
+                    $authenticator = $container->make(CookieAuthenticator::class);
+                    $authenticator->save($user, $response);
+                }
+                if ($user->data->getString('last_visit','') === '') {
+                    // @todo Подтверждение соглашений
+                    $userRepo->setVisit($user);
+                }
+            }
+        }
+
+        $response->setBody([
+            'email' => $email,
+            'errors' => $errors,
+        ]);
+
+        return $response;
     }
 }

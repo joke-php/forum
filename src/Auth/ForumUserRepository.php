@@ -34,8 +34,11 @@ class ForumUserRepository
      * @throws ParameterResolveException При ошибках связывания параметров
      * @throws ConnectionException       При ошибках соединения
      */
-    public function __construct(ConnectionManager $connectionManager, private readonly AuthRepository $authRepository)
-    {
+    public function __construct(
+        ConnectionManager $connectionManager,
+        private readonly AuthRepository $authRepository,
+        private readonly PasswordHasher $passwordHasher,
+    ) {
         $this->connection = $connectionManager->connection();
     }
 
@@ -70,11 +73,62 @@ class ForumUserRepository
         $exists = $result->fetch();
         if ($exists) {
             $props = new PropsCollection([
-                'nickname' => $exists['nickname'],
+                'forum_nickname' => $exists['nickname'],
                 'email' => $exists['email'],
             ]);
 
             return new User($exists['id'], $props);
+        }
+
+        return null;
+    }
+
+    public function getByEmailAndPassword(string $email, string $password): ?User
+    {
+        $result = $this->connection->query(
+            <<<'SQL'
+                    SELECT u.id, u.email, f.nickname, u.password FROM forum_user f
+                                   INNER JOIN user u ON u.id = f.user_id
+                                   WHERE u.email = :email
+                                   LIMIT 1
+                SQL,
+            ['email' => $email],
+        );
+
+        $exists = $result->fetch();
+        if ($exists && $this->passwordHasher->verify($password, $exists['password'])) {
+            $props = new PropsCollection([
+                'forum_nickname' => $exists['nickname'],
+                'email' => $exists['email'],
+            ]);
+
+            return new User($exists['id'], $props);
+        }
+
+        return null;
+    }
+
+    public function getActive(int $id): ?User
+    {
+        $result = $this->connection->query(
+            <<<'SQL'
+                    SELECT u.id, u.email, f.nickname, u.last_visit FROM forum_user f
+                                   INNER JOIN user u ON u.id = f.user_id
+                                   WHERE u.id = :id and (u.blocked_to <= NOW() or u.blocked_to IS NULL)
+                                   LIMIT 1
+                SQL,
+            ['id' => $id],
+        );
+
+        $exists = $result->fetch();
+        if ($exists) {
+            $props = new PropsCollection([
+                'forum_nickname' => $exists['nickname'],
+                'email' => $exists['email'],
+                'last_visit' => $exists['last_visit'],
+            ]);
+
+            return new User((int) $exists['id'], $props);
         }
 
         return null;
@@ -96,13 +150,31 @@ class ForumUserRepository
      */
     public function add(string $email, string $password, string $nickname): int
     {
-        $id = $this->authRepository->add($email, $password);
+        $passwordHash = $this->passwordHasher->hash($password);
+        $id = $this->authRepository->add($email, $passwordHash);
 
         $this->connection->execute(
             'INSERT INTO forum_user (user_id, nickname) values (:user_id, :nickname) ',
             ['user_id' => $id, 'nickname' => $nickname],
         );
 
+        $result = $this->connection->query("select id from role where module = 'forum' and name='user'");
+        $exist = $result->fetch();
+        if ($exist) {
+            $this->connection->execute(
+                'INSERT INTO user_role (user_id, role_id) values (:user_id, :role_id) ',
+                ['user_id' => $id, 'role_id' => $exist['id']],
+            );
+        }
+
         return $id;
+    }
+
+    public function setVisit(User $user): void
+    {
+        $this->connection->execute(
+            'UPDATE user SET last_visit = :last_visit where id = :user_id',
+            ['user_id' => $user->id, 'last_visit' => new \DateTime()->format('Y-m-d H:i:s')],
+        );
     }
 }

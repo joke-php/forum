@@ -109,6 +109,8 @@ class MenuComponent extends BaseComponent
             'url' => $item->url,
             'label' => $item->label,
             'classList' => $item->classList ?? '',
+            'id' => $item->id,
+            'idExits' => $item->id !== '',
         ];
         if ([] === $item->children) {
             return $result;

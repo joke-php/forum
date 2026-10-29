@@ -11,6 +11,7 @@ use Vasoft\Joke\Container\ServiceContainer;
 use Vasoft\Joke\Contract\Provider\ConfigurableServiceProviderInterface;
 use Vasoft\Joke\Forum\Auth\Base\AuthRepository;
 use Vasoft\Joke\Forum\Auth\Base\ConsentRepository;
+use Vasoft\Joke\Forum\Auth\Base\CookieAuthenticator;
 use Vasoft\Joke\Forum\Auth\ForumUserRepository;
 use Vasoft\Joke\Forum\Auth\PasswordHasher;
 use Vasoft\Joke\Forum\Menu\MenuComponent;
@@ -49,6 +50,7 @@ class ForumProvider extends AbstractProvider implements ConfigurableServiceProvi
         $this->serviceContainer->registerSingleton(ForumUserRepository::class, ForumUserRepository::class);
         $this->serviceContainer->registerSingleton(AuthRepository::class, AuthRepository::class);
         $this->serviceContainer->registerSingleton(ConsentRepository::class, ConsentRepository::class);
+        $this->serviceContainer->registerSingleton(CookieAuthenticator::class, CookieAuthenticator::class);
     }
 
     public function boot(): void

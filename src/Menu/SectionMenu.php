@@ -85,7 +85,7 @@ class SectionMenu implements MenuInterface
      */
     protected function mapItem(array $item): MenuItem
     {
-        $entity = new MenuItem($item['url'], $item['name'], true);
+        $entity = new MenuItem($item['url'], $item['name']);
         if (isset($item['children'])) {
             $entity->children = $this->mapItems($item['children']);
         }

@@ -42,7 +42,7 @@ class UserMenu implements MenuInterface
             if ($this->checker->can($this->user, 'forum', 'sections.add')) {
                 $items[] = new MenuItem('#', 'Добавить раздел');
             }
-            $items[] = new MenuItem('#', 'Выход');
+            $items[] = new MenuItem('javascript:void(0)', 'Выход', classList: 'jf-logout');
 
             return $items;
         }
