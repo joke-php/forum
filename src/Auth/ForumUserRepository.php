@@ -177,4 +177,44 @@ class ForumUserRepository
             ['user_id' => $user->id, 'last_visit' => new \DateTime()->format('Y-m-d H:i:s')],
         );
     }
+
+    public function fillUserByIds(array $users): array
+    {
+        if (empty($users)) {
+            return [];
+        }
+        $ids = array_keys($users);
+
+        $placeholders = implode(
+            ',',
+            array_map(
+                static fn(int $i): string => ":id_{$i}",
+                array_keys($ids),
+            ),
+        );
+
+        $params = array_combine(
+            array_map(static fn(int $i): string => ":id_{$i}", array_keys($ids)),
+            $ids,
+        );
+
+        $queryResult = $this->connection->query(
+            <<<SQL
+                    SELECT u.id, f.nickname, IF((u.blocked_to <= NOW() or u.blocked_to IS NULL), 0, 1) AS blocked
+                    FROM forum_user f
+                    INNER JOIN user u ON u.id = f.user_id
+                    WHERE u.id IN ({$placeholders})
+                SQL,
+            $params,
+        );
+
+        foreach ($queryResult as $user) {
+            $users[(int) $user['id']] = [
+                'nickname' => $user['nickname'],
+                'blocked' => 1 === $user['blocked'],
+            ];
+        }
+
+        return $users;
+    }
 }

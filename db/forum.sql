@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS forum_read_tracker
 );
 
 DELIMITER //
+# @todo Подумать как обновлять количество у родительских разделов
 CREATE TRIGGER IF NOT EXISTS after_message_insert
     AFTER INSERT
     ON forum_messages
