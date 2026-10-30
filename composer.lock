@@ -55,12 +55,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/joke-php/db-sql.git",
-                "reference": "305cf458016561c0340cf98da7221eedc1e4cca7"
+                "reference": "a5b2b4dfee0f9372fb59748234b0c5761671753a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/joke-php/db-sql/zipball/305cf458016561c0340cf98da7221eedc1e4cca7",
-                "reference": "305cf458016561c0340cf98da7221eedc1e4cca7",
+                "url": "https://api.github.com/repos/joke-php/db-sql/zipball/a5b2b4dfee0f9372fb59748234b0c5761671753a",
+                "reference": "a5b2b4dfee0f9372fb59748234b0c5761671753a",
                 "shasum": ""
             },
             "require": {
@@ -98,7 +98,7 @@
                 "issues": "https://github.com/joke-php/db-sql/issues",
                 "source": "https://github.com/joke-php/db-sql/tree/next"
             },
-            "time": "2026-10-30T04:59:54+00:00"
+            "time": "2026-10-30T05:05:05+00:00"
         },
         {
             "name": "joke-php/templator",
