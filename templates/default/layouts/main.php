@@ -6,6 +6,7 @@
 <div class="content">
     {% component vasoft:menu forum-side sectionMenuConfig %}
     <main>
+        {% component vasoft:menu breadcrumb breadcrumbConfig %}
         {% if notFirstLevel %}
         <h1>{%defer page.title%}</h1>
         {% endif %}

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Vasoft\Joke\Forum\Contract;
 
+use Vasoft\Joke\Http\Response\Html\PageBuilder;
+
 /**
  * Интерфейс меню.
  *
@@ -30,4 +32,6 @@ interface MenuInterface
      * Дополнительный контекст для передачи в шаблон.
      */
     public function getContext(): array;
+
+    public function onRender(PageBuilder $pageBuilder): void;
 }

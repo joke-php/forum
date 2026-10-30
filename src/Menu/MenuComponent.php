@@ -29,6 +29,7 @@ class MenuComponent extends BaseComponent
      * для поиска соответствующей конфигурации в MenuConfig.
      */
     private string $menuName;
+    private MenuInterface $entity;
 
     public function __construct(
         private readonly MenuManager $manager,
@@ -55,15 +56,15 @@ class MenuComponent extends BaseComponent
             throw new TemplatorException('Option "menu" is required.');
         }
         $this->menuName = trim($options['id']);
+        $this->entity = $this->manager->get($this->menuName);
 
         return parent::setOptions($options);
     }
 
     protected function getContext(): array
     {
-        $entity = $this->manager->get($this->menuName);
-        $menu = $this->mapMenu($entity);
-        $context = $entity->getContext();
+        $menu = $this->mapMenu($this->entity);
+        $context = $this->entity->getContext();
         $context['items'] = $menu;
 
         return $context;
@@ -110,7 +111,7 @@ class MenuComponent extends BaseComponent
             'label' => $item->label,
             'classList' => $item->classList ?? '',
             'id' => $item->id,
-            'idExits' => $item->id !== '',
+            'idExits' => '' !== $item->id,
         ];
         if ([] === $item->children) {
             return $result;
@@ -136,6 +137,7 @@ class MenuComponent extends BaseComponent
      */
     protected function beforeRender(PageBuilder $pageBuilder): void
     {
+        $this->entity->onRender($pageBuilder);
         $css = $this->templateFile('style.css');
         if (file_exists($css)) {
             $pageBuilder->css->addToBody($css);

@@ -8,6 +8,7 @@ use Vasoft\Joke\Auth\AuthService;
 use Vasoft\Joke\Auth\Rights\RightsChecker;
 use Vasoft\Joke\Auth\User;
 use Vasoft\Joke\Forum\Contract\MenuInterface;
+use Vasoft\Joke\Http\Response\Html\PageBuilder;
 
 class UserMenu implements MenuInterface
 {
@@ -57,5 +58,10 @@ class UserMenu implements MenuInterface
         return [
             'authorized' => $this->user->authorized,
         ];
+    }
+
+    public function onRender(PageBuilder $pageBuilder): void
+    {
+        // TODO: Implement onRender() method.
     }
 }

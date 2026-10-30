@@ -6,6 +6,7 @@ namespace Vasoft\Joke\Forum\Menu;
 
 use Vasoft\Joke\Forum\Contract\MenuInterface;
 use Vasoft\Joke\Forum\Repository\SectionRepository;
+use Vasoft\Joke\Http\Response\Html\PageBuilder;
 
 /**
  * Меню разделов форума.
@@ -96,5 +97,9 @@ class SectionMenu implements MenuInterface
     public function getContext(): array
     {
         return [];
+    }
+    public function onRender(PageBuilder $pageBuilder): void
+    {
+        // TODO: Implement onRender() method.
     }
 }

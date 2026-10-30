@@ -1,4 +1,4 @@
-<nav class="side-menu">
+<nav class="side-menu" aria-label="Основная навигация">
     <div class="side-menu__title"></div>
     <ul class="side-menu__list">
         {% foreach item in items %}

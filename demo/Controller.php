@@ -6,6 +6,8 @@ namespace Vasoft\Joke\Forum\Demo;
 
 use Vasoft\Joke\Auth\AuthService;
 use Vasoft\Joke\Auth\Rights\RightsChecker;
+use Vasoft\Joke\Forum\Menu\Breadcrumb;
+use Vasoft\Joke\Forum\Menu\MenuItem;
 use Vasoft\Joke\Forum\Menu\MenuManager;
 use Vasoft\Joke\Forum\Repository\SectionRepository;
 use Vasoft\Joke\Http\Csrf\CsrfTokenManager;
@@ -42,15 +44,19 @@ readonly class Controller
         $response = $builder->makeDefault();
         $response->builder->setTitle('Форум');
         $response->builder->addMeta('csrf-token', $this->tokenManager->getServerToken($this->request));
-
+        /** @var Breadcrumb $menu */
+        $menu = $this->menuManager->get('breadcrumb');
 
         $sectionInfo = false;
         $notFirstLevel = false;
         if ('' !== $sub) {
             $sectionInfo = $this->sectionRepo->getSubSectionInfo($category, $sub);
+            $menu->register(new MenuItem('/' . $sectionInfo['parent_slug'], $sectionInfo['parent_name']));
+            $menu->register(new MenuItem('/' . $sectionInfo['slug'], $sectionInfo['name'],enabled: false));
             $notFirstLevel = true;
         } elseif ('' !== $category) {
             $sectionInfo = $this->sectionRepo->getSectionInfo($category);
+            $menu->register(new MenuItem('/' . $sectionInfo['slug'], $sectionInfo['name'],enabled: false));
             $notFirstLevel = true;
         }
         $response->builder->setTitle($sectionInfo['name'] ?? 'Форум');
@@ -73,6 +79,7 @@ readonly class Controller
         $context = [
             'sectionMenuConfig' => ['id' => 'sections'],
             'userMenuConfig' => ['id' => 'user'],
+            'breadcrumbConfig' => ['id' => 'breadcrumb'],
             'categories' => Data::getCategories(),
             'items' => Data::getTopics(),
             'pager' => $pager,
