@@ -11,6 +11,7 @@ use Vasoft\Joke\Db\Sql\Exceptions\QueryException;
 class SectionRepository
 {
     private ConnectionInterface $connection;
+    private ?array $sections = null;
 
     public function __construct(ConnectionManager $manager)
     {
@@ -45,25 +46,50 @@ class SectionRepository
     }
 
     /**
+     * @throws QueryException
+     */
+    public function getSectionIndex(): array|false
+    {
+        if (null !== $this->sections) {
+            return $this->sections;
+        }
+        $this->sections = [];
+        $result = $this->connection->query(
+            'SELECT id, name, slug, parent_id FROM forum_section ORDER BY parent_id, sort',
+        );
+        foreach ($result as $section) {
+            $this->sections[(int) $section['id']] = $section;
+        }
+        // @todo: Путь вычислять в роутере
+        foreach ($this->sections as &$section) {
+            $parentId = (int) $section['parent_id'];
+
+            if ($parentId > 0 && array_key_exists($parentId, $this->sections)) {
+                $section['url'] = '/' . $this->sections[$parentId]['slug'] . '/' . $section['slug'];
+            } else {
+                $section['url'] = '/' . $section['slug'];
+                $section['parent_id'] = null;
+            }
+        }
+
+        return $this->sections;
+    }
+
+    /**
      * @return list<array<string,mixed>>
      *
      * @throws QueryException
      */
     public function getTree(): array
     {
-        $sections = $this->connection->query(
-            'SELECT id, name, slug, parent_id FROM forum_section ORDER BY parent_id, sort',
-        );
+        $sections = $this->getSectionIndex();
 
         $map = [];
-        foreach ($sections as $section) {
-            $id = (int) $section['id'];
-            $parentId = null === $section['parent_id'] ? null : (int) $section['parent_id'];
-
+        foreach ($sections as $id => $section) {
             $map[$id] = [
                 'name' => $section['name'],
-                'url' => '/' . $section['slug'],
-                'parent_id' => $parentId,
+                'url' =>  $section['url'],
+                'parent_id' => $section['parent_id'],
                 'children' => [],
             ];
         }
@@ -73,7 +99,6 @@ class SectionRepository
             if (null === $node['parent_id']) {
                 $tree[] = &$node;
             } elseif (isset($map[$node['parent_id']])) {
-                $node['url'] = $map[$node['parent_id']]['url'] . $node['url'];
                 $map[$node['parent_id']]['children'][] = &$node;
             }
         }

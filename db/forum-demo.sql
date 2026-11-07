@@ -15,10 +15,6 @@ VALUES (1, 'Voral'),
        (5, 'Elena');
 ALTER TABLE forum_user AUTO_INCREMENT 6;
 -- 2. Разделы форума (Categories & Subcategories)
-delete from forum_messages where id < 10000000;
-delete from forum_topic where id < 10000000;
-delete from forum_section where id < 10000000;
-
 -- Корневые разделы
 INSERT INTO forum_section (id, name, slug, parent_id, sort, description)
 VALUES (1, 'Веб-разработка', 'web-development', NULL, 100, 'Все о создании сайтов'),
@@ -43,6 +39,9 @@ VALUES (301, 'Docker', 'docker', 3, 301, 'Контейнеризация при�
        (303, 'Git', 'git', 3, 303, 'Контроль версий');
 ALTER TABLE forum_section AUTO_INCREMENT 303;
 -- 3. Топики (Topics)
+delete from forum_messages where id < 10000000;
+delete from forum_topic where id < 10000000;
+
 -- PHP Topics
 INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, messages, priority)
 VALUES (1001, 'DI-контейнер в PHP 8.5', 101, 1, '2026-10-10 10:00:00', '2026-10-14 12:00:00', 0, 500),
@@ -53,8 +52,7 @@ VALUES (1001, 'DI-контейнер в PHP 8.5', 101, 1, '2026-10-10 10:00:00',
 -- JavaScript Topics
 INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, messages, priority)
 VALUES (1005, 'Асинхронность в JS', 102, 5, '2026-10-11 10:00:00', '2026-10-12 15:00:00', 0, 500),
-       (1006, 'TypeScript vs JavaScript', 102, 4, '2026-10-12 12:00:00', '2026-10-14 18:00:00', 0, 500),
-       (1007, 'Webpack настройка', 102, 3, '2026-10-10 16:00:00', '2026-10-10 16:00:00', 0, 500);
+       (1006, 'TypeScript vs JavaScript', 102, 4, '2026-10-12 12:00:00', '2026-10-14 18:00:00', 0, 500);
 
 -- CSS Topics
 INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, messages, priority)
@@ -65,21 +63,18 @@ VALUES (1008, 'Flexbox или Grid?', 103, 2, '2026-10-10 11:00:00', '2026-10-11
 -- MySQL Topics
 INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, messages, priority)
 VALUES (2001, 'Оптимизация запросов', 201, 3, '2026-10-11 10:00:00', '2026-10-13 12:00:00', 0, 500),
-       (2002, 'Нормализация БД', 201, 2, '2026-10-10 15:00:00', '2026-10-10 15:00:00', 0, 500),
        (2003, 'Транзакции в MySQL', 201, 5, '2026-10-12 14:00:00', '2026-10-14 16:00:00', 0, 500);
 
 -- PostgreSQL Topics
 INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, messages, priority)
 VALUES (2004, 'JSONB тип данных', 202, 4, '2026-10-11 11:00:00', '2026-10-12 13:00:00', 0, 500),
-       (2005, 'Миграции базы данных', 202, 1, '2026-10-12 10:00:00', '2026-10-15 09:00:00', 0, 500),
-       (2006, 'Репликация PostgreSQL', 202, 2, '2026-10-10 12:00:00', '2026-10-10 12:00:00', 0, 500);
+       (2005, 'Миграции базы данных', 202, 1, '2026-10-12 10:00:00', '2026-10-15 09:00:00', 0, 500);
 
 -- Docker Topics
 INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, messages, priority)
 VALUES (3001, 'Multi-stage builds', 301, 5, '2026-10-12 10:00:00', '2026-10-14 11:00:00', 0, 500),
        (3002, 'Docker Compose для разработки', 301, 4, '2026-10-13 09:00:00', '2026-10-15 14:00:00', 0, 500),
-       (3003, 'Оптимизация Docker образов', 301, 1, '2026-10-11 16:00:00', '2026-10-13 10:00:00', 0, 500),
-       (3004, 'Docker networking', 301, 3, '2026-10-10 10:00:00', '2026-10-10 10:00:00', 0, 500);
+       (3003, 'Оптимизация Docker образов', 301, 1, '2026-10-11 16:00:00', '2026-10-13 10:00:00', 0, 500);
 
 -- CI/CD Topics
 INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, messages, priority)
@@ -90,8 +85,7 @@ VALUES (3005, 'GitHub Actions для PHP', 302, 2, '2026-10-10 14:00:00', '2026-
 -- Git Topics
 INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, messages, priority)
 VALUES (3008, 'Git flow стратегия', 303, 1, '2026-10-12 09:00:00', '2026-10-14 10:00:00', 0, 500),
-       (3009, 'Interactive rebase', 303, 2, '2026-10-11 15:00:00', '2026-10-13 11:00:00', 0, 500),
-       (3010, '.gitignore best practices', 303, 4, '2026-10-10 11:00:00', '2026-10-10 11:00:00', 0, 500);
+       (3009, 'Interactive rebase', 303, 2, '2026-10-11 15:00:00', '2026-10-13 11:00:00', 0, 500);
 ALTER TABLE forum_section AUTO_INCREMENT 3010;
 -- 4. Сообщения (Messages)
 -- Топик 1001: DI-контейнер

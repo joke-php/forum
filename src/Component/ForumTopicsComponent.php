@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vasoft\Joke\Forum\Component;
 
 use Vasoft\Joke\Forum\Auth\ForumUserRepository;
+use Vasoft\Joke\Forum\Repository\SectionRepository;
 use Vasoft\Joke\Forum\Repository\TopicRepository;
 use Vasoft\Joke\Templator\Component\BaseComponent;
 
@@ -21,6 +22,7 @@ class ForumTopicsComponent extends BaseComponent
     public function __construct(
         private readonly TopicRepository $topicRepo,
         private readonly ForumUserRepository $forumUserRepo,
+        private readonly SectionRepository $sectionRepo,
     ) {}
 
     public static function vendor(): string
@@ -51,22 +53,30 @@ class ForumTopicsComponent extends BaseComponent
     protected function getContext(): array
     {
         $count = $this->topicRepo->getCount($this->sectionId);
-        $topics = $this->topicRepo->getPage($this->sectionId, $this->page, $this->perPage);
+        $offset = ($this->page - 1) * $this->perPage;
+        $topics = $this->topicRepo->getPage($this->sectionId, $offset, $this->perPage);
         $authors = [];
         foreach ($topics as $topic) {
             $authors[$topic['user_id']] = false;
         }
         $authors = $this->forumUserRepo->fillUserByIds($authors);
+        $sections = $this->sectionRepo->getSectionIndex();
+
         $items = [];
         foreach ($topics as $topic) {
             $date = \DateTime::createFromFormat('Y-m-d H:i:s', $topic['updated_at']);
+            $sectionId = (int)$topic['section_id'];
+            if (!array_key_exists($sectionId, $sections)) {
+                continue;
+            }
+
             $items[] = [
                 'new' => false,
                 'name' => $topic['name'],
                 'author' => $authors[$topic['user_id']] ?? ['nickname' => 'Удаленный', 'blocked' => false],
                 'updated' => $date->format('Y-m-d H:i'),
                 'messages' => $topic['messages'] - 1,
-                'link' => $this->basePath.'/'.$topic['id'],
+                'url' => $sections[$sectionId]['url'].'/'.$topic['id'],
             ];
         }
 

@@ -64,6 +64,7 @@ class TopicRepository
                         t.created_at,
                         t.updated_at,
                         t.messages,
+                        t.section_id,
                         t.priority
                     FROM forum_topic t
                     ORDER BY t.priority, t.created_at DESC
@@ -90,6 +91,7 @@ class TopicRepository
                         t.created_at,
                         t.updated_at,
                         t.messages,
+                        t.section_id,
                         t.priority
                     FROM forum_topic t
                     WHERE t.section_id IN (SELECT id FROM section_tree)

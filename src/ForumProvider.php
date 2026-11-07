@@ -50,14 +50,16 @@ class ForumProvider extends AbstractProvider implements ConfigurableServiceProvi
 
     public function register(): void
     {
-        $this->serviceContainer->registerSingleton(SectionRepository::class, SectionRepository::class);
         $this->serviceContainer->registerSingleton(MenuManager::class, MenuManager::class);
-        $this->serviceContainer->registerSingleton(ForumUserRepository::class, ForumUserRepository::class);
+        $this->serviceContainer->registerSingleton(CookieAuthenticator::class, CookieAuthenticator::class);
+
         $this->serviceContainer->registerSingleton(AuthRepository::class, AuthRepository::class);
         $this->serviceContainer->registerSingleton(ConsentRepository::class, ConsentRepository::class);
-        $this->serviceContainer->registerSingleton(CookieAuthenticator::class, CookieAuthenticator::class);
+
+        $this->serviceContainer->registerSingleton(ForumUserRepository::class, ForumUserRepository::class);
         $this->serviceContainer->registerSingleton(TopicRepository::class, TopicRepository::class);
         $this->serviceContainer->registerSingleton(MessageRepository::class, MessageRepository::class);
+        $this->serviceContainer->registerSingleton(SectionRepository::class, SectionRepository::class);
     }
 
     public function boot(): void
