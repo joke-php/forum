@@ -18,7 +18,7 @@ $router->post('/user/register', [AuthController::class, 'register']);
 $router->post('/user/login', [AuthController::class, 'auth']);
 $router->get('/user/logout', [AuthController::class, 'logout']);
 $router->get(
-    '/[{category:slug}[/{sub:slug}[/{topicId:int}]]]',
+    '/[{category:slug}[/{sub:slug}]]',
     static function (ServiceContainer $container, HttpRequest $request) {
         /** @todo доработать make контейнера для массива */
         /** @var Controller $controller */
@@ -41,7 +41,7 @@ $router->get(
         /** @var Controller $controller */
         $controller = $container->make(Controller::class);
         $params = $container->getParameterResolver()->resolveForCallable(
-            [Controller::class, 'index'],
+            [Controller::class, 'topic'],
             [
                 'category' => $request->props->getString('category', ''),
                 'sub' => $request->props->getString('sub', ''),

@@ -11,6 +11,7 @@ use Vasoft\Joke\Forum\Menu\Breadcrumb;
 use Vasoft\Joke\Forum\Menu\MenuItem;
 use Vasoft\Joke\Forum\Menu\MenuManager;
 use Vasoft\Joke\Forum\Repository\SectionRepository;
+use Vasoft\Joke\Forum\Repository\TopicRepository;
 use Vasoft\Joke\Http\Csrf\CsrfTokenManager;
 use Vasoft\Joke\Http\HttpRequest;
 use Vasoft\Joke\Http\Response\ResponseBuilder;
@@ -25,6 +26,7 @@ readonly class Controller
         private HttpRequest $request,
         private RightsChecker $rightsChecker,
         private SectionRepository $sectionRepo,
+        private TopicRepository $topicRepo,
         private MenuManager $menuManager,
         AuthService $authService,
     ) {
@@ -55,8 +57,9 @@ readonly class Controller
         $sectionId = null;
         if ('' !== $sub) {
             $sectionInfo = $this->sectionRepo->getSubSectionInfo($category, $sub);
+            $sectionUrl = '/' . $sectionInfo['parent_slug'] . '/' . $sectionInfo['slug'];
             $menu->register(new MenuItem('/' . $sectionInfo['parent_slug'], $sectionInfo['parent_name']));
-            $menu->register(new MenuItem('/' . $sectionInfo['slug'], $sectionInfo['name'], enabled: false));
+            $menu->register(new MenuItem($sectionUrl, $sectionInfo['name'], enabled: false));
             $sectionId = (int) $sectionInfo['id'];
         } elseif ('' !== $category) {
             $sectionInfo = $this->sectionRepo->getSectionInfo($category);
@@ -101,30 +104,38 @@ readonly class Controller
          *        $route = $this->router->route('test');
          */
         $sectionInfo = $this->sectionRepo->getSubSectionInfo($category, $sub);
-
-        $menu->register(new MenuItem('/' . $sectionInfo['parent_slug'], $sectionInfo['parent_name']));
-        $menu->register(new MenuItem('/' . $sectionInfo['slug'], $sectionInfo['name'], enabled: false));
         $sectionId = (int) $sectionInfo['id'];
+        $topicInfo = $this->topicRepo->getTopicInfo($sectionId, $topicId);
 
-        $response->builder->setTitle($sectionInfo['name'] ?? 'Форум');
+        $sectionUrl = '/' . $sectionInfo['parent_slug'] . '/' . $sectionInfo['slug'];
+        $path = $sectionUrl . '/' . $topicInfo['id'];
+        $menu->register(new MenuItem('/' . $sectionInfo['parent_slug'], $sectionInfo['parent_name']));
+        $menu->register(new MenuItem($sectionUrl, $sectionInfo['name']));
+        $menu->register(new MenuItem($path, $topicInfo['name'], enabled: false));
+
+        $response->builder->setTitle($topicInfo['name'] ?? 'Форум');
 
         $hasNewTopicButton = '' !== $sub && $this->userCan('topic.add');
         $hasNewSubButton = '' === $sub && $this->userCan('section.add');
 
         $context = [
-            'forumTopicsConfig' => ['sectionId' => $sectionId, 'basePath' => $this->request->getPath()],
+            'forumTopicConfig' => [
+                'sectionId' => $sectionId,
+                'topicId' => $topicId,
+                'messageCount' => $topicInfo['messages'],
+                'basePath' => $this->request->getPath(),
+            ],
             'sectionMenuConfig' => ['id' => 'sections'],
             'userMenuConfig' => ['id' => 'user'],
             'breadcrumbConfig' => ['id' => 'breadcrumb'],
-            'hasNewTopicButton' => $hasNewTopicButton,
-            'hasNewSubButton' => $hasNewSubButton,
-            'hasToolbar' => $hasNewTopicButton || $hasNewSubButton,
+            'hasNewMessageButton' => true,
+            'hasToolbar' => true,
             'needHeader' => '' !== $category || '' !== $sub, // @todo Свойство респонза?
             'notFirstLevel' => null !== $sectionId,
         ];
 
         return $response->show(
-            'pages/forum-index.php',
+            'pages/forum-topic.php',
             $context,
             0, // ttl: без кэша, удобно на время разработки
         );

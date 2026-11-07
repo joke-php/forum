@@ -73,7 +73,7 @@ class ForumTopicsComponent extends BaseComponent
         return [
             'topicPagerConfig' => [
                 'count' => $count,
-                'page' => 1,
+                'page' => $this->page,
                 'baseUrl' => $this->basePath,
             ],
             'items' => $items,

@@ -6,6 +6,7 @@ namespace Vasoft\Joke\Forum\Repository;
 
 use Vasoft\Joke\Db\Sql\ConnectionManager;
 use Vasoft\Joke\Db\Sql\Contract\ConnectionInterface;
+use Vasoft\Joke\Db\Sql\Exceptions\QueryException;
 
 class TopicRepository
 {
@@ -17,9 +18,7 @@ class TopicRepository
     }
 
     /**
-     * @param int|null $sectionId
-     * @return int
-     * @throws \Vasoft\Joke\Db\Sql\Exceptions\QueryException
+     * @throws QueryException
      *
      * @todo брать информацию из поля?
      */
@@ -102,5 +101,22 @@ class TopicRepository
         }
 
         return $result->all();
+    }
+
+    public function getTopicInfo(int $sectionId, int $topicId): array
+    {
+        $result = $this->connection->query(
+            <<<'SQL'
+                SELECT
+                    t.id,
+                    t.name,
+                    t.user_id
+                FROM forum_topic t
+                WHERE t.id = :topic_id AND t.section_id = :section_id;
+                SQL,
+            ['topic_id' => $topicId, 'section_id' => $sectionId],
+        );
+
+        return $result->fetch();
     }
 }

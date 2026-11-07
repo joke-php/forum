@@ -14,11 +14,13 @@ use Vasoft\Joke\Forum\Auth\Base\ConsentRepository;
 use Vasoft\Joke\Forum\Auth\Base\CookieAuthenticator;
 use Vasoft\Joke\Forum\Auth\ForumUserRepository;
 use Vasoft\Joke\Forum\Auth\PasswordHasher;
+use Vasoft\Joke\Forum\Component\ForumTopicComponent;
 use Vasoft\Joke\Forum\Component\ForumTopicsComponent;
 use Vasoft\Joke\Forum\Component\PagerComponent;
 use Vasoft\Joke\Forum\Menu\MenuComponent;
 use Vasoft\Joke\Forum\Menu\MenuConfig;
 use Vasoft\Joke\Forum\Menu\MenuManager;
+use Vasoft\Joke\Forum\Repository\MessageRepository;
 use Vasoft\Joke\Forum\Repository\SectionRepository;
 use Vasoft\Joke\Forum\Repository\TopicRepository;
 use Vasoft\Joke\Provider\AbstractProvider;
@@ -55,6 +57,7 @@ class ForumProvider extends AbstractProvider implements ConfigurableServiceProvi
         $this->serviceContainer->registerSingleton(ConsentRepository::class, ConsentRepository::class);
         $this->serviceContainer->registerSingleton(CookieAuthenticator::class, CookieAuthenticator::class);
         $this->serviceContainer->registerSingleton(TopicRepository::class, TopicRepository::class);
+        $this->serviceContainer->registerSingleton(MessageRepository::class, MessageRepository::class);
     }
 
     public function boot(): void
@@ -64,6 +67,8 @@ class ForumProvider extends AbstractProvider implements ConfigurableServiceProvi
         $components->set(MenuComponent::componentName(), MenuComponent::class);
         $components->set(ForumTopicsComponent::componentName(), ForumTopicsComponent::class);
         $components->set(PagerComponent::componentName(), PagerComponent::class);
+        $components->set(ForumTopicComponent::componentName(), ForumTopicComponent::class);
+
         /** @var Environment $env */
         $env = $this->serviceContainer->get(Environment::class);
         $this->serviceContainer->registerSingleton(
