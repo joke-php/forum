@@ -6,8 +6,10 @@ use Vasoft\Joke\Application\KernelConfig;
 use Vasoft\Joke\Db\Sql\DatabaseProvider;
 use Vasoft\Joke\Templator\TemplatorProvider;
 use Vasoft\Joke\Forum\ForumProvider;
+use Vasoft\JokeAvatar\AvatarProvider;
 
 return new KernelConfig()
     ->addProvider(DatabaseProvider::class)
     ->addProvider(TemplatorProvider::class)
-    ->addProvider(ForumProvider::class);
+    ->addProvider(ForumProvider::class)
+    ->addProvider(AvatarProvider::class);

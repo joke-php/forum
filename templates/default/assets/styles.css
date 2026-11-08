@@ -8,6 +8,14 @@
 .forum-message__info {
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.forum-message__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 32px;
 }
 
 .forum-message__date {

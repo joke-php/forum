@@ -9,10 +9,16 @@ use Vasoft\Joke\Http\HttpRequest;
 use Vasoft\Joke\Http\Response\ResponseBuilder;
 use Vasoft\Joke\Http\Response\ResponseStatus;
 use Vasoft\Joke\Routing\Router;
+use Vasoft\JokeAvatar\Controller\AvatarController;
 
 /**
  * @var Router $router
  */
+$router->get(
+    path: '/avatar/{nickname}',
+    handler: AvatarController::class,
+    name: 'avatar.generate',
+);
 $router->get('/user/register', [AuthController::class, 'registerForm']);
 $router->post('/user/register', [AuthController::class, 'register']);
 $router->post('/user/login', [AuthController::class, 'auth']);
@@ -59,3 +65,9 @@ $router->get(
         ResponseStatus::NOT_FOUND,
     )->setBody('Not found ' . $path),
 );
+
+//$router->get(
+//    path: '/avatar/{nickname}',
+//    handler: AvatarController::class,
+//    name: 'avatar.generate',
+//);
