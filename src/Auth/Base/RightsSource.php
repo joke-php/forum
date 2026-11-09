@@ -20,13 +20,14 @@ use Vasoft\Joke\Db\Sql\Exceptions\QueryException;
  * user_role -> role_right -> right_item.
  * Формат возвращаемого права: "module:name" (например, "posts:create").
  */
-readonly class RightsSource implements RightsSourceInterface
+class RightsSource implements RightsSourceInterface
 {
+    private array $rights = [];
     /**
      * Активное подключение к базе данных.
      * Получено через ConnectionManager при инициализации сервиса.
      */
-    private ConnectionInterface $connection;
+    private readonly ConnectionInterface $connection;
 
     /**
      * @param ConnectionManager $connectionManager Менеджер подключений для получения соединения по умолчанию
@@ -58,21 +59,26 @@ readonly class RightsSource implements RightsSourceInterface
         if (null === $user->id) {
             return [];
         }
+        if (array_key_exists($user->id, $this->rights)) {
+            return $this->rights[$user->id];
+        }
 
         $sql = <<<'SQL'
-            SELECT DISTINCT CONCAT(ri.module,':', ri.name) as role_code
-                FROM right_item ri
-                INNER JOIN role_right rr ON ri.id = rr.right_id
-                INNER JOIN user_role ur ON rr.role_id = ur.role_id
-                WHERE ur.user_id = :user_id;
+            SELECT DISTINCT CONCAT(ri.module,':', ri.name) AS right_code
+            FROM right_item ri
+            WHERE ri.id IN (
+                SELECT rr.right_id FROM user_role ur JOIN role_right rr ON rr.role_id = ur.role_id WHERE ur.user_id = :user_id
+                UNION
+                SELECT right_id FROM user_right WHERE user_id = :user_id
+            );
             SQL;
 
         $result = $this->connection->query($sql, ['user_id' => $user->id]);
-        $roleCodes = [];
+        $this->rights[$user->id] = [];
         foreach ($result as $row) {
-            $roleCodes[] = (string) $row['role_code'];
+            $this->rights[$user->id][] = (string) $row['right_code'];
         }
 
-        return $roleCodes;
+        return $this->rights[$user->id];
     }
 }
