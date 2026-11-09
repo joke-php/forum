@@ -1,10 +1,10 @@
 -- 1. Пользователи (создаем базовых пользователей для форума)
-# INSERT INTO user (id, email, password, confirmed, created_at, last_visit)
-# VALUES (1, 'voral@example.com', '$2y$10$demo_hash_password_1', TRUE, '2026-09-01 10:00:00', '2026-10-22 12:00:00'),
-#        (2, 'alex@example.com', '$2y$10$demo_hash_password_2', TRUE, '2026-09-05 14:30:00', '2026-10-21 09:15:00'),
-#        (3, 'maria@example.com', '$2y$10$demo_hash_password_3', TRUE, '2026-09-10 11:20:00', '2026-10-20 18:45:00'),
-#        (4, 'dmitry@example.com', '$2y$10$demo_hash_password_4', TRUE, '2026-09-15 16:00:00', '2026-10-22 08:30:00'),
-#        (5, 'elena@example.com', '$2y$10$demo_hash_password_5', TRUE, '2026-09-20 09:45:00', '2026-10-19 22:10:00');
+ INSERT INTO user (id, email, password, confirmed, created_at, last_visit)
+ VALUES (1, 'voral@example.com', '$2y$10$demo_hash_password_1', TRUE, '2026-09-01 10:00:00', '2026-10-22 12:00:00'),
+        (2, 'alex@example.com', '$2y$10$demo_hash_password_2', TRUE, '2026-09-05 14:30:00', '2026-10-21 09:15:00'),
+        (3, 'maria@example.com', '$2y$10$demo_hash_password_3', TRUE, '2026-09-10 11:20:00', '2026-10-20 18:45:00'),
+        (4, 'dmitry@example.com', '$2y$10$demo_hash_password_4', TRUE, '2026-09-15 16:00:00', '2026-10-22 08:30:00'),
+        (5, 'elena@example.com', '$2y$10$demo_hash_password_5', TRUE, '2026-09-20 09:45:00', '2026-10-19 22:10:00');
 
 -- Профили пользователей форума (никнеймы)
 INSERT INTO forum_user (user_id, nickname)

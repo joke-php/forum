@@ -212,6 +212,8 @@ class ForumUserRepository
             $users[(int) $user['id']] = [
                 'nickname' => $user['nickname'],
                 'blocked' => 1 === $user['blocked'],
+                // @todo получать из роута
+                'avatar' => '/avatar/'.urlencode($user['nickname'])
             ];
         }
 
