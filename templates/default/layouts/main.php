@@ -1,4 +1,5 @@
 {% include css __layout.css head %}
+{% include js __layout.js body %}
 <header>
     <div class="title">Joke Forum</div>
     {% component vasoft:menu user userMenuConfig %}
@@ -11,6 +12,7 @@
         <h1>{%defer page.title%}</h1>
         {% endif %}
         {%raw __layout.content%}
+        <div id="form-box"></div>
     </main>
 </div>
 <footer>

@@ -14,4 +14,3 @@ use Vasoft\Joke\Templator\TemplateEngine;
  */
 $response->builder->css->addToHead($templatePath . 'assets/styles.css');
 $response->builder->js->addToBody($templatePath . 'assets/theme-switch.js');
-$response->builder->js->addToBody($templatePath . 'assets/menu.js');

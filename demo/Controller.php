@@ -10,15 +10,20 @@ use Vasoft\Joke\Contract\Auth\UserInterface;
 use Vasoft\Joke\Forum\Menu\Breadcrumb;
 use Vasoft\Joke\Forum\Menu\MenuItem;
 use Vasoft\Joke\Forum\Menu\MenuManager;
+use Vasoft\Joke\Forum\Repository\MessageRepository;
 use Vasoft\Joke\Forum\Repository\SectionRepository;
 use Vasoft\Joke\Forum\Repository\TopicRepository;
 use Vasoft\Joke\Http\Csrf\CsrfTokenManager;
 use Vasoft\Joke\Http\HttpRequest;
+use Vasoft\Joke\Http\Response\JsonResponse;
 use Vasoft\Joke\Http\Response\ResponseBuilder;
 use Vasoft\Joke\Templator\TemplatedResponse;
 
 readonly class Controller
 {
+    private const int MIN_MESSAGE_LENGTH = 10;
+    private const int MAX_MESSAGE_LENGTH = 5000;
+
     private UserInterface $user;
 
     public function __construct(
@@ -27,6 +32,7 @@ readonly class Controller
         private RightsChecker $rightsChecker,
         private SectionRepository $sectionRepo,
         private TopicRepository $topicRepo,
+        private MessageRepository $messageRepo,
         private MenuManager $menuManager,
         AuthService $authService,
     ) {
@@ -115,8 +121,7 @@ readonly class Controller
 
         $response->builder->setTitle($topicInfo['name'] ?? 'Форум');
 
-        $hasNewTopicButton = '' !== $sub && $this->userCan('topic.add');
-        $hasNewSubButton = '' === $sub && $this->userCan('section.add');
+        $hasNewMessageButton = $this->userCan('message.add');
 
         $context = [
             'forumTopicConfig' => [
@@ -128,8 +133,7 @@ readonly class Controller
             'sectionMenuConfig' => ['id' => 'sections'],
             'userMenuConfig' => ['id' => 'user'],
             'breadcrumbConfig' => ['id' => 'breadcrumb'],
-            'hasNewMessageButton' => true,
-            'hasToolbar' => true,
+            'hasNewMessageButton' => $hasNewMessageButton,
             'needHeader' => '' !== $category || '' !== $sub, // @todo Свойство респонза?
             'notFirstLevel' => null !== $sectionId,
         ];
@@ -139,5 +143,40 @@ readonly class Controller
             $context,
             0, // ttl: без кэша, удобно на время разработки
         );
+    }
+
+    public function addMessage(ResponseBuilder $builder, HttpRequest $request): JsonResponse
+    {
+        $message = $request->post->getString('message', '');
+        $topicId = $request->post->getInt('topicId', 0);
+        $message = trim(strip_tags($message));
+        $length = mb_strlen($message);
+        $result = [
+            'success' => true,
+            'message' => '',
+        ];
+
+        if ($length < self::MIN_MESSAGE_LENGTH || $length > self::MAX_MESSAGE_LENGTH) {
+            $result['success'] = false;
+            $result['message']
+                = $length < self::MIN_MESSAGE_LENGTH
+                    ? sprintf('Сообщение слишком короткое. Минимум %d символов.', self::MIN_MESSAGE_LENGTH)
+                    : sprintf('Сообщение слишком длинное. Максимум %d символов.', self::MAX_MESSAGE_LENGTH);
+        } else {
+            $topic = $this->topicRepo->getTopicInfo(-1, $topicId);
+            if (false === $topic) {
+                $result['success'] = false;
+                $result['message'] = 'Тема не найдена или удалена. Обратитесь к администратору для получения дополнительной информации.';
+            }
+        }
+        if ($result['success']) {
+            $result['id'] = $this->messageRepo->addMessage($this->user->id, $topicId,  $message);
+        }
+
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+        $response->setBody($result);
+
+        return $response;
     }
 }

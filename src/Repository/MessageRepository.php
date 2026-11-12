@@ -18,7 +18,6 @@ class MessageRepository
 
     public function getMessages(?int $topicId, int $offset, int $limit): array
     {
-
         return $this->connection->query(
             <<<'SQL'
                 SELECT id, user_id, content, created_at
@@ -33,5 +32,19 @@ class MessageRepository
                 'offset' => $offset,
             ],
         )->all();
+    }
+
+    public function addMessage(int $userId, int $topicId, string $message): int
+    {
+        $this->connection->execute(
+            'INSERT INTO forum_messages (topic_id, user_id, content) VALUES(:topic_id, :user_id, :content)',
+            [
+                'topic_id' => $topicId,
+                'user_id' => $userId,
+                'content' => $message,
+            ],
+        );
+
+        return (int) $this->connection->getLastInsertId();
     }
 }

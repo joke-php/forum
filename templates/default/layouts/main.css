@@ -80,7 +80,19 @@
 * {
     box-sizing: border-box;
 }
+html, body, div, textarea, pre {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-text-secondary) var(--color-bg-tertiary);
+}
 
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+div::-webkit-scrollbar,
+textarea::-webkit-scrollbar,
+pre::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
 a {
     color: var(--color-text-link);
     transition: color 0.3s;
@@ -260,7 +272,15 @@ main {
     display: flex;
     align-items: center;
 }
-
+.form__input_auto {
+    overflow: hidden;
+    resize: none;
+    min-height: 50px;
+    box-sizing: border-box;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    line-height: 1.2rem;
+}
 .btn {
     display: flex;
     align-items: center;

@@ -2,10 +2,14 @@
 
 declare(strict_types=1);
 
+use Vasoft\Joke\Auth\AuthMiddleware;
+use Vasoft\Joke\Auth\AuthService;
+use Vasoft\Joke\Auth\Rights\RightsChecker;
 use Vasoft\Joke\Container\ServiceContainer;
 use Vasoft\Joke\Forum\Auth\AuthController;
 use Vasoft\Joke\Forum\Demo\Controller;
 use Vasoft\Joke\Http\HttpRequest;
+use Vasoft\Joke\Http\Response\JsonResponse;
 use Vasoft\Joke\Http\Response\ResponseBuilder;
 use Vasoft\Joke\Http\Response\ResponseStatus;
 use Vasoft\Joke\Routing\Router;
@@ -18,6 +22,21 @@ $router->get(
     path: '/avatar/{nickname}',
     handler: AvatarController::class,
     name: 'avatar.generate',
+);
+$router->post('/message/add', [Controller::class, 'addMessage'])
+    ->setDefaultResponseClass(JsonResponse::class)
+    ->addMiddleware(
+    static fn(
+        AuthService $authService,
+        RightsChecker $rightsChecker,
+        ResponseBuilder $responseBuilder,
+    ) => new AuthMiddleware(
+        $authService,
+        $rightsChecker,
+        $responseBuilder,
+        ['forum:message.add'],
+        null,
+    ),
 );
 $router->get('/user/register', [AuthController::class, 'registerForm']);
 $router->post('/user/register', [AuthController::class, 'register']);
@@ -65,9 +84,3 @@ $router->get(
         ResponseStatus::NOT_FOUND,
     )->setBody('Not found ' . $path),
 );
-
-//$router->get(
-//    path: '/avatar/{nickname}',
-//    handler: AvatarController::class,
-//    name: 'avatar.generate',
-//);

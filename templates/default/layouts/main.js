@@ -1,30 +1,16 @@
 (function (window, document) {
     'use strict';
+    window.addEventListener('load', () => {
+        if (location.hash) {
+            const el = document.getElementById(location.hash.slice(1));
+            if (el) el.scrollIntoView({ block: 'start' });
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
-        initSideMenu();
         initLogin();
         initLogout();
     });
-
-    function initSideMenu() {
-        const menus = document.querySelectorAll('.side-menu');
-
-        const toggleMenu = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const menu = e.currentTarget.closest('.side-menu');
-            menu.classList.toggle('side-menu_active');
-
-            return false;
-        };
-
-        menus.forEach(menu => {
-            const menuBtn = menu.querySelector('.side-menu__title');
-            menuBtn.addEventListener('click', toggleMenu);
-        })
-    }
 
     function initLogout() {
         const btn = document.querySelectorAll('.jf-logout');
@@ -36,7 +22,9 @@
             })
         })
     }
-
+    function getCsrfToken() {
+        return  document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    }
     function initLogin() {
         const btn = document.querySelectorAll('.jf-login');
         const showLogin = (e) => {
@@ -57,7 +45,6 @@
             const remember = createCheckbox('remember', 'Запомнить меня', 'ok');
             const links = createEl('div', ['form__links']);
             const link = createEl('a');
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             /**
              *
              * @param {string[]} message
@@ -95,7 +82,7 @@
                         method: 'POST',
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-Token': csrfToken,
+                            'X-CSRF-Token': getCsrfToken(),
                         },
                         body: formData,
                     });
@@ -175,6 +162,32 @@
         el.placeholder = placeholder;
         el.name = name;
         el.classList.add('form__input');
+        if (classes.length) el.classList.add(...classes);
+        if (options.autocomplete) el.setAttribute('autocomplete', options.autocomplete);
+
+        const box = document.createElement('label');
+        box.classList.add('form__row');
+        if (boxClasses.length) el.classList.add(...boxClasses);
+        box.appendChild(el);
+        return box;
+    };
+    const createHidden = (name, value) => {
+        const el = document.createElement('input');
+        el.type = 'hidden';
+        el.value = value;
+        el.name = name;
+        return el;
+    };
+    const createTextAreaInput = (name, placeholder, classes = [], boxClasses = [], options = {}) => {
+        const el = document.createElement('textarea');
+        el.placeholder = placeholder;
+        el.name = name;
+        el.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+        el.classList.add('form__input');
+        el.classList.add('form__input_auto');
         if (classes.length) el.classList.add(...classes);
         if (options.autocomplete) el.setAttribute('autocomplete', options.autocomplete);
 
@@ -274,10 +287,18 @@
             options.afterInit(popup);
         }
     }
+    if (typeof window.JokeForum === 'undefined') {
+        window.JokeForum = {}
+    }
 
-    window.JokeForum = {
+    Object.assign(window.JokeForum, {
         showPopup: showPopup,
         closePopup: closePopup,
         createEl: createEl,
-    };
+        createCheckbox: createCheckbox,
+        createTextInput: createTextInput,
+        createTextAreaInput: createTextAreaInput,
+        createHidden: createHidden,
+        getCsrfToken: getCsrfToken,
+    });
 })(window, document);

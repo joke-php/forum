@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace Vasoft\Joke\Forum\Component;
 
+use DateTime;
+use Vasoft\Joke\Auth\AuthService;
+use Vasoft\Joke\Auth\Rights\RightsChecker;
+use Vasoft\Joke\Contract\Auth\UserInterface;
 use Vasoft\Joke\Forum\Auth\ForumUserRepository;
 use Vasoft\Joke\Forum\Repository\MessageRepository;
 use Vasoft\Joke\Forum\Repository\TopicRepository;
+use Vasoft\Joke\Http\Response\Html\PageBuilder;
 use Vasoft\Joke\Templator\Component\BaseComponent;
 
 class ForumTopicComponent extends BaseComponent
@@ -20,12 +25,16 @@ class ForumTopicComponent extends BaseComponent
     private mixed $basePath = '';
     private ?int $topicId = null;
     private int $messageCount = 0;
+    private UserInterface $user;
 
     public function __construct(
         private readonly MessageRepository $messageRepo,
-        private readonly TopicRepository $topicRepo,
         private readonly ForumUserRepository $forumUserRepo,
-    ) {}
+        private readonly RightsChecker $rightsChecker,
+        AuthService $authService,
+    ) {
+        $this->user = $authService->getUser();
+    }
 
     public static function vendor(): string
     {
@@ -54,6 +63,15 @@ class ForumTopicComponent extends BaseComponent
         return dirname(__DIR__, 2) . '/templates/components/vasoft/forum/topic/';
     }
 
+    protected function beforeRender(PageBuilder $pageBuilder): void
+    {
+        if ($this->userCan('message.add')) {
+            $js = $this->templateFile('user.js');
+            if (file_exists($js)) {
+                $pageBuilder->js->addToBody($js);
+            }
+        }
+    }
     protected function getContext(): array
     {
         $messages = $this->messageRepo->getMessages($this->topicId, $this->page, $this->perPage);
@@ -64,8 +82,9 @@ class ForumTopicComponent extends BaseComponent
         $authors = $this->forumUserRepo->fillUserByIds($authors);
         $items = [];
         foreach ($messages as $topic) {
-            $date = \DateTime::createFromFormat('Y-m-d H:i:s', $topic['created_at']);
+            $date = DateTime::createFromFormat('Y-m-d H:i:s', $topic['created_at']);
             $items[] = [
+                'id' => $topic['id'],
                 'new' => false,
                 'content' => $topic['content'],
                 'author' => $authors[$topic['user_id']] ?? ['nickname' => 'Удаленный', 'blocked' => false],
@@ -79,7 +98,16 @@ class ForumTopicComponent extends BaseComponent
                 'page' => $this->page,
                 'baseUrl' => $this->basePath,
             ],
+            'topicId' => $this->topicId,
             'items' => $items,
+            'hasNewMessageButton' => $this->userCan('message.add'),
         ];
+    }
+
+    private function userCan(string $right): bool
+    {
+        // @todo Роли, имя модуля в отдельный класс (enum)
+        // @todo Сервис проверки прав форума
+        return $this->rightsChecker->can($this->user, 'forum', $right);
     }
 }

@@ -105,19 +105,32 @@ class TopicRepository
         return $result->all();
     }
 
-    public function getTopicInfo(int $sectionId, int $topicId): array
+    public function getTopicInfo(int $sectionId, int $topicId): array|false
     {
-        $result = $this->connection->query(
-            <<<'SQL'
-                SELECT
-                    t.id,
-                    t.name,
-                    t.user_id
-                FROM forum_topic t
-                WHERE t.id = :topic_id AND t.section_id = :section_id;
-                SQL,
-            ['topic_id' => $topicId, 'section_id' => $sectionId],
-        );
+        // @todo: Временное решение продумать механизм
+        $result = $sectionId < 0
+            ? $this->connection->query(
+                <<<'SQL'
+                    SELECT
+                        t.id,
+                        t.name,
+                        t.user_id
+                    FROM forum_topic t
+                    WHERE t.id = :topic_id;
+                    SQL,
+                ['topic_id' => $topicId],
+            )
+            : $this->connection->query(
+                <<<'SQL'
+                    SELECT
+                        t.id,
+                        t.name,
+                        t.user_id
+                    FROM forum_topic t
+                    WHERE t.id = :topic_id AND t.section_id = :section_id;
+                    SQL,
+                ['topic_id' => $topicId, 'section_id' => $sectionId],
+            );
 
         return $result->fetch();
     }
