@@ -15,6 +15,11 @@
         </div>
     </div>
     <div class="forum-message__content">{{item.content}}</div>
+    <div class="forum-message__toolbar">
+        <svg class="icon tool-btn jf-adm-message-edit"><use href="#icon-edit"></use></svg>
+        <svg class="icon tool-btn jf-adm-message-move"><use href="#icon-move"></use></svg>
+        <svg class="icon tool-btn tool-btn_error jf-adm-message-delete"><use href="#icon-delete"></use></svg>
+    </div>
 </div>
 {% endforeach %}
 {% component vasoft:pager default topicPagerConfig %}

@@ -67,7 +67,7 @@ class TopicRepository
                         t.section_id,
                         t.priority
                     FROM forum_topic t
-                    ORDER BY t.priority, t.created_at DESC
+                    ORDER BY t.priority, t.updated_at DESC
                     LIMIT :offset, :limit;
                     SQL,
                 ['offset' => $offset, 'limit' => $limit],
@@ -95,7 +95,7 @@ class TopicRepository
                         t.priority
                     FROM forum_topic t
                     WHERE t.section_id IN (SELECT id FROM section_tree)
-                    ORDER BY t.priority, t.created_at DESC
+                    ORDER BY t.priority, t.updated_at DESC
                     LIMIT :offset, :limit;
                     SQL,
                 ['section_id' => $sectionId, 'offset' => $offset, 'limit' => $limit],
@@ -116,7 +116,8 @@ class TopicRepository
                         t.name,
                         t.user_id
                     FROM forum_topic t
-                    WHERE t.id = :topic_id;
+                    WHERE t.id = :topic_id
+                    ORDER BY t.priority, t.updated_at DESC;
                     SQL,
                 ['topic_id' => $topicId],
             )
@@ -127,7 +128,8 @@ class TopicRepository
                         t.name,
                         t.user_id
                     FROM forum_topic t
-                    WHERE t.id = :topic_id AND t.section_id = :section_id;
+                    WHERE t.id = :topic_id AND t.section_id = :section_id
+                    ORDER BY t.priority, t.updated_at DESC;
                     SQL,
                 ['topic_id' => $topicId, 'section_id' => $sectionId],
             );

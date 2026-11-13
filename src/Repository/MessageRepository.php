@@ -23,6 +23,7 @@ class MessageRepository
                 SELECT id, user_id, content, created_at
                 FROM forum_messages
                 WHERE topic_id = :topic_id
+                ORDER BY created_at 
                 LIMIT :limit
                 OFFSET :offset
                 SQL,

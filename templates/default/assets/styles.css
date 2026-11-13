@@ -26,6 +26,29 @@
 .forum-message__content {
     padding-top: 8px;
 }
+.forum-message__toolbar{
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: right;
+    color: var(--color-text-secondary);
+}
+.tool-btn{
+    cursor: pointer;
+}
+.icon.tool-btn:hover{
+    color: var(--color-accent);
+}
+.icon.tool-btn_error{
+    color: var(--color-error-text);
+}
+.icon.tool-btn_error:hover{
+    color: var(--color-error-border);
+}
+
 
 .forum-topic {
     border: 1px solid var(--color-border);
