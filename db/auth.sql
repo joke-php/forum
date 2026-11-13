@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS user
 (
-    id         INT PRIMARY KEY AUTO_INCREMENT,
+    id         INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     email      VARCHAR(255) NOT NULL UNIQUE,
     password   VARCHAR(255) NOT NULL,
     confirmed  BOOLEAN  DEFAULT FALSE,
@@ -10,13 +10,16 @@ CREATE TABLE IF NOT EXISTS user
     INDEX idx_email (email)
 );
 
-CREATE TABLE IF NOT EXISTS user_remember_token
+CREATE TABLE user_remember_tokens
 (
-    id         INT PRIMARY KEY AUTO_INCREMENT,
-    user_id    INT         NOT NULL,
-    token      VARCHAR(64) NOT NULL UNIQUE,
-    expires_at TIMESTAMP   NOT NULL,
+    id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id    INT UNSIGNED NOT NULL,
+    token      VARCHAR(64)  NOT NULL UNIQUE,
+    expires_at DATETIME     NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_id (user_id),
     INDEX idx_token (token),
+    INDEX idx_expires_at (expires_at),
     FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 );
 
@@ -31,7 +34,7 @@ CREATE TABLE IF NOT EXISTS role
 
 CREATE TABLE IF NOT EXISTS user_role
 (
-    user_id INT NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
     role_id INT NOT NULL,
     PRIMARY KEY (user_id, role_id),
     FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE,
@@ -58,7 +61,7 @@ CREATE TABLE IF NOT EXISTS role_right
 
 CREATE TABLE IF NOT EXISTS user_right
 (
-    user_id  INT NOT NULL,
+    user_id  INT UNSIGNED NOT NULL,
     right_id INT NOT NULL,
     PRIMARY KEY (user_id, right_id),
     FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE,
@@ -69,7 +72,7 @@ CREATE TABLE IF NOT EXISTS user_consent
 (
     id         INT PRIMARY KEY AUTO_INCREMENT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    user_id    INT,
+    user_id    INT UNSIGNED,
     ip         VARCHAR(24),
     url        VARCHAR(256),
     consent    VARCHAR(64),

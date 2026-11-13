@@ -46,7 +46,6 @@ delete from forum_topic where id < 10000000;
 INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, messages, priority)
 VALUES (1001, 'DI-контейнер в PHP 8.5', 101, 1, '2026-10-10 10:00:00', '2026-10-14 12:00:00', 0, 500),
        (1002, 'Middleware паттерн', 101, 4, '2026-10-11 14:00:00', '2026-10-13 16:00:00', 0, 500),
-       (1003, 'Роутинг без фреймворка', 101, 2, '2026-10-10 09:00:00', '2026-10-10 09:00:00', 0, 500),
        (1004, 'Обработка JSON запросов', 101, 3, '2026-10-12 11:00:00', '2026-10-15 10:00:00', 0, 500);
 
 -- JavaScript Topics
@@ -58,7 +57,8 @@ VALUES (1005, 'Асинхронность в JS', 102, 5, '2026-10-11 10:00:00',
 INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, messages, priority)
 VALUES (1008, 'Flexbox или Grid?', 103, 2, '2026-10-10 11:00:00', '2026-10-11 14:00:00', 0, 500),
        (1009, 'CSS переменные', 103, 1, '2026-10-09 10:00:00', '2026-10-10 12:00:00', 0, 500),
-       (1010, 'Адаптивная верстка', 103, 4, '2026-10-12 09:00:00', '2026-10-15 11:00:00', 0, 500);
+       (1010, 'Адаптивная верстка', 103, 4, '2026-10-12 09:00:00', '2026-10-15 11:00:00', 0, 500),
+       (1011, 'Как выровнять блок', 103, null, '2026-10-14 09:00:00', '2026-10-15 11:00:00', 0, 500);
 
 -- MySQL Topics
 INSERT INTO forum_topic (id, name, section_id, user_id, created_at, updated_at, messages, priority)
@@ -139,6 +139,10 @@ VALUES (1010, 'Mobile-first или desktop-first?', 4, '2026-10-12 09:00:00'),
        (1010, 'Меньше медиа-запросов нужно.', 1, '2026-10-14 11:00:00'),
        (1010, 'Согласен с mobile-first.', 2, '2026-10-14 16:00:00'),
        (1010, 'Переделаю проект под mobile-first.', 4, '2026-10-15 11:00:00');
+
+INSERT INTO forum_messages (topic_id, content, user_id, created_at)
+VALUES (1011, 'Не понимаю как это делать', null, '2026-10-14 15:00:00'),
+       (1011, 'Задай вопрос точнее', 2, '2026-10-15 11:00:00');
 
 -- Топик 2001: MySQL Opt
 INSERT INTO forum_messages (topic_id, content, user_id, created_at)

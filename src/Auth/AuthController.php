@@ -20,7 +20,6 @@ use Vasoft\Joke\Exceptions\FileSystemException;
 use Vasoft\Joke\Forum\Auth\Base\ConsentRepository;
 use Vasoft\Joke\Forum\Auth\Base\CookieAuthenticator;
 use Vasoft\Joke\Forum\Auth\Base\SessionAuthenticator;
-use Vasoft\Joke\Forum\Demo\Data;
 use Vasoft\Joke\Http\Csrf\CsrfTokenManager;
 use Vasoft\Joke\Http\HttpRequest;
 use Vasoft\Joke\Http\Response\JsonResponse;
@@ -190,7 +189,8 @@ class AuthController
             [
                 'sectionMenuConfig' => ['id' => 'sections'],
                 'userMenuConfig' => ['id' => 'user'],
-                'categories' => Data::getCategories(),
+                'breadcrumbConfig' => ['id' => 'breadcrumb'],
+                'categories' => [],//Data::getCategories(),
                 'errors' => $errors,
                 'message' => $message ?? '',
                 'nickname' => $nickname,
@@ -228,7 +228,8 @@ class AuthController
             [
                 'sectionMenuConfig' => ['id' => 'sections'],
                 'userMenuConfig' => ['id' => 'user'],
-                'categories' => Data::getCategories(),
+                'breadcrumbConfig' => ['id' => 'breadcrumb'],
+                'categories' => [],//Data::getCategories(),
                 'message' => '',
                 'errors' => [],
             ],
