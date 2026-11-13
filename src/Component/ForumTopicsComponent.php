@@ -57,7 +57,9 @@ class ForumTopicsComponent extends BaseComponent
         $topics = $this->topicRepo->getPage($this->sectionId, $offset, $this->perPage);
         $authors = [];
         foreach ($topics as $topic) {
-            $authors[$topic['user_id']] = false;
+            if ($topic['user_id'] !== null) {
+                $authors[$topic['user_id']] = false;
+            }
         }
         $authors = $this->forumUserRepo->fillUserByIds($authors);
         $sections = $this->sectionRepo->getSectionIndex();
@@ -73,7 +75,7 @@ class ForumTopicsComponent extends BaseComponent
             $items[] = [
                 'new' => false,
                 'name' => $topic['name'],
-                'author' => $authors[$topic['user_id']] ?? ['nickname' => 'Удаленный', 'blocked' => false],
+                'author' => $topic['user_id'] === null || !isset($authors[$topic['user_id']]) ? ['nickname' => '[Удаленный]', 'blocked' => false] : $authors[$topic['user_id']],
                 'updated' => $date->format('Y-m-d H:i'),
                 'messages' => $topic['messages'] - 1,
                 'url' => $sections[$sectionId]['url'].'/'.$topic['id'],

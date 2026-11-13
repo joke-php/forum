@@ -10,7 +10,6 @@ use Vasoft\Joke\Auth\Rights\RightsChecker;
 use Vasoft\Joke\Contract\Auth\UserInterface;
 use Vasoft\Joke\Forum\Auth\ForumUserRepository;
 use Vasoft\Joke\Forum\Repository\MessageRepository;
-use Vasoft\Joke\Forum\Repository\TopicRepository;
 use Vasoft\Joke\Http\Response\Html\PageBuilder;
 use Vasoft\Joke\Templator\Component\BaseComponent;
 
@@ -74,12 +73,23 @@ class ForumTopicComponent extends BaseComponent
     }
     protected function getContext(): array
     {
-        $messages = $this->messageRepo->getMessages($this->topicId, $this->page, $this->perPage);
+        $offset = ($this->page - 1) * $this->perPage;
+        $messages = $this->messageRepo->getMessages($this->topicId, $offset, $this->perPage);
         $authors = [];
         foreach ($messages as $topic) {
-            $authors[$topic['user_id']] = false;
+            if ($topic['user_id'] !== null) {
+                $authors[$topic['user_id']] = false;
+            }
         }
         $authors = $this->forumUserRepo->fillUserByIds($authors);
+
+        $deleted  = [
+            'nickname' => '[Удаленный]',
+            'blocked' => false,
+            // @todo получать из роута
+            'avatar' => '/avatar/'.urlencode('!!')
+        ];
+
         $items = [];
         foreach ($messages as $topic) {
             $date = DateTime::createFromFormat('Y-m-d H:i:s', $topic['created_at']);
@@ -87,7 +97,7 @@ class ForumTopicComponent extends BaseComponent
                 'id' => $topic['id'],
                 'new' => false,
                 'content' => $topic['content'],
-                'author' => $authors[$topic['user_id']] ?? ['nickname' => 'Удаленный', 'blocked' => false],
+                'author' => $topic['user_id'] === null || !isset($authors[$topic['user_id']]) ? $deleted : $authors[$topic['user_id']],
                 'created' => $date->format('Y-m-d H:i'),
             ];
         }
