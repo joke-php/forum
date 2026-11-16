@@ -91,7 +91,7 @@
             }
 
             try {
-                const response = await fetch('/message/add', {
+                const response = await fetch('/message', {
                     method: 'POST',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',

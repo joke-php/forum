@@ -23,7 +23,7 @@ $router->get(
     handler: AvatarController::class,
     name: 'avatar.generate',
 );
-$router->post('/message/add', [Controller::class, 'addMessage'])
+$router->post('/message', [Controller::class, 'addMessage'])
     ->setDefaultResponseClass(JsonResponse::class)
     ->addMiddleware(
     static fn(
@@ -35,6 +35,21 @@ $router->post('/message/add', [Controller::class, 'addMessage'])
         $rightsChecker,
         $responseBuilder,
         ['forum:message.add'],
+        null,
+    ),
+);
+$router->put('/message', [Controller::class, 'updateMessage'])
+    ->setDefaultResponseClass(JsonResponse::class)
+    ->addMiddleware(
+    static fn(
+        AuthService $authService,
+        RightsChecker $rightsChecker,
+        ResponseBuilder $responseBuilder,
+    ) => new AuthMiddleware(
+        $authService,
+        $rightsChecker,
+        $responseBuilder,
+        ['forum:message.manage'],
         null,
     ),
 );

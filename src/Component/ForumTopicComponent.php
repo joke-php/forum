@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Vasoft\Joke\Forum\Component;
 
-use DateTime;
 use Vasoft\Joke\Auth\AuthService;
 use Vasoft\Joke\Auth\Rights\RightsChecker;
 use Vasoft\Joke\Contract\Auth\UserInterface;
@@ -70,14 +69,21 @@ class ForumTopicComponent extends BaseComponent
                 $pageBuilder->js->addToBody($js);
             }
         }
+        if ($this->userCan('message.manage')) {
+            $js = $this->templateFile('manager.js');
+            if (file_exists($js)) {
+                $pageBuilder->js->addToBody($js);
+            }
+        }
     }
+
     protected function getContext(): array
     {
         $offset = ($this->page - 1) * $this->perPage;
         $messages = $this->messageRepo->getMessages($this->topicId, $offset, $this->perPage);
         $authors = [];
         foreach ($messages as $topic) {
-            if ($topic['user_id'] !== null) {
+            if (null !== $topic['user_id']) {
                 $authors[$topic['user_id']] = false;
             }
         }
@@ -87,17 +93,18 @@ class ForumTopicComponent extends BaseComponent
             'nickname' => '[Удаленный]',
             'blocked' => false,
             // @todo получать из роута
-            'avatar' => '/avatar/'.urlencode('!!')
+            'avatar' => '/avatar/' . urlencode('!!'),
         ];
 
         $items = [];
         foreach ($messages as $topic) {
-            $date = DateTime::createFromFormat('Y-m-d H:i:s', $topic['created_at']);
+            $date = \DateTime::createFromFormat('Y-m-d H:i:s', $topic['created_at']);
             $items[] = [
                 'id' => $topic['id'],
                 'new' => false,
-                'content' => $topic['content'],
-                'author' => $topic['user_id'] === null || !isset($authors[$topic['user_id']]) ? $deleted : $authors[$topic['user_id']],
+                'content' => nl2br($topic['content']?? ''),
+                'admin_note' => nl2br($topic['admin_note'] ?? ''),
+                'author' => null === $topic['user_id'] || !isset($authors[$topic['user_id']]) ? $deleted : $authors[$topic['user_id']],
                 'created' => $date->format('Y-m-d H:i'),
             ];
         }
@@ -110,6 +117,7 @@ class ForumTopicComponent extends BaseComponent
             ],
             'topicId' => $this->topicId,
             'items' => $items,
+            'canManage' => $this->userCan('message.manage'),
             'hasNewMessageButton' => $this->userCan('message.add'),
         ];
     }

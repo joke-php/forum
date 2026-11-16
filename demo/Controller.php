@@ -170,7 +170,46 @@ readonly class Controller
             }
         }
         if ($result['success']) {
-            $result['id'] = $this->messageRepo->addMessage($this->user->id, $topicId,  $message);
+            $result['id'] = $this->messageRepo->addMessage($this->user->id, $topicId, $message);
+        }
+
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+        $response->setBody($result);
+
+        return $response;
+    }
+
+    private function normalizedMessage(string $message): string
+    {
+        return trim(strip_tags($message));
+    }
+
+    public function updateMessage(ResponseBuilder $builder, HttpRequest $request): JsonResponse
+    {
+        $message = (string) ($request->json['message'] ?? '');
+        $note = (string) ($request->json['note'] ??  '');
+        $messageId = (int) ($request->json['messageId'] ??  0);
+
+        $message = $this->normalizedMessage($message);
+        $note = $this->normalizedMessage($note);
+
+        $exists = $this->messageRepo->exists($messageId);
+        $result = [
+            'success' => false,
+            'message' => print_r([$message, $note, $messageId, $exists], true),
+            'request' => $request->json,
+            'exists' => $exists,
+        ];
+
+        if ($exists) {
+            $this->messageRepo->updateMessage($messageId, [
+                'content' => $message,
+                'admin_note' => $note,
+            ]);
+            $result['success'] = true;
+        } else {
+            $result['message'] = 'Сообщение отсутствует.';
         }
 
         /** @var JsonResponse $response */

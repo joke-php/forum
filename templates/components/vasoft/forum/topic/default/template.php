@@ -14,12 +14,20 @@
             <div class="forum-message__date">{{item.created}}</div>
         </div>
     </div>
-    <div class="forum-message__content">{{item.content}}</div>
+    <div class="forum-message__content">{% raw item.content %}</div>
+    {% if item.admin_note %}
+    <div class="forum-message__note">
+        Примечание администратора:
+        <div>{% raw item.admin_note %}</div>
+    </div>
+    {% endif %}
+    {% if canManage %}
     <div class="forum-message__toolbar">
-        <svg class="icon tool-btn jf-adm-message-edit"><use href="#icon-edit"></use></svg>
+        <svg class="icon tool-btn jf-adm-message-edit" data-id="{{item.id}}"><use href="#icon-edit"></use></svg>
         <svg class="icon tool-btn jf-adm-message-move"><use href="#icon-move"></use></svg>
         <svg class="icon tool-btn tool-btn_error jf-adm-message-delete"><use href="#icon-delete"></use></svg>
     </div>
+    {% endif %}
 </div>
 {% endforeach %}
 {% component vasoft:pager default topicPagerConfig %}
