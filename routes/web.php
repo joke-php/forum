@@ -15,6 +15,19 @@ use Vasoft\Joke\Http\Response\ResponseStatus;
 use Vasoft\Joke\Routing\Router;
 use Vasoft\JokeAvatar\Controller\AvatarController;
 
+
+$managerMiddleware = static fn(
+    AuthService $authService,
+    RightsChecker $rightsChecker,
+    ResponseBuilder $responseBuilder,
+) => new AuthMiddleware(
+    $authService,
+    $rightsChecker,
+    $responseBuilder,
+    ['forum:message.manage'],
+    null,
+);
+
 /**
  * @var Router $router
  */
@@ -40,19 +53,10 @@ $router->post('/message', [Controller::class, 'addMessage'])
 );
 $router->put('/message', [Controller::class, 'updateMessage'])
     ->setDefaultResponseClass(JsonResponse::class)
-    ->addMiddleware(
-    static fn(
-        AuthService $authService,
-        RightsChecker $rightsChecker,
-        ResponseBuilder $responseBuilder,
-    ) => new AuthMiddleware(
-        $authService,
-        $rightsChecker,
-        $responseBuilder,
-        ['forum:message.manage'],
-        null,
-    ),
-);
+    ->addMiddleware($managerMiddleware);
+$router->delete('/message/{id:int}', [Controller::class, 'deleteMessage'])
+    ->setDefaultResponseClass(JsonResponse::class)
+    ->addMiddleware($managerMiddleware);
 $router->get('/user/register', [AuthController::class, 'registerForm']);
 $router->post('/user/register', [AuthController::class, 'register']);
 $router->post('/user/login', [AuthController::class, 'auth']);

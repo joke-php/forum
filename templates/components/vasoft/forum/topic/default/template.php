@@ -25,7 +25,7 @@
     <div class="forum-message__toolbar">
         <svg class="icon tool-btn jf-adm-message-edit" data-id="{{item.id}}"><use href="#icon-edit"></use></svg>
         <svg class="icon tool-btn jf-adm-message-move"><use href="#icon-move"></use></svg>
-        <svg class="icon tool-btn tool-btn_error jf-adm-message-delete"><use href="#icon-delete"></use></svg>
+        <svg class="icon tool-btn tool-btn_error jf-adm-message-delete" data-id="{{item.id}}"><use href="#icon-delete"></use></svg>
     </div>
     {% endif %}
 </div>

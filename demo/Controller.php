@@ -197,9 +197,6 @@ readonly class Controller
         $exists = $this->messageRepo->exists($messageId);
         $result = [
             'success' => false,
-            'message' => print_r([$message, $note, $messageId, $exists], true),
-            'request' => $request->json,
-            'exists' => $exists,
         ];
 
         if ($exists) {
@@ -207,6 +204,26 @@ readonly class Controller
                 'content' => $message,
                 'admin_note' => $note,
             ]);
+            $result['success'] = true;
+        } else {
+            $result['message'] = 'Сообщение отсутствует.';
+        }
+
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+        $response->setBody($result);
+
+        return $response;
+    }
+    public function deleteMessage(ResponseBuilder $builder, HttpRequest $request, int $id): JsonResponse
+    {
+        $exists = $this->messageRepo->exists($id);
+        $result = [
+            'success' => false,
+        ];
+
+        if ($exists) {
+            $this->messageRepo->deleteMessage($id);
             $result['success'] = true;
         } else {
             $result['message'] = 'Сообщение отсутствует.';

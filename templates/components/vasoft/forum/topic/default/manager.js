@@ -132,14 +132,72 @@
         });
     }
 
+    /**
+     * Обрезает текст до N слов или M символов (что наступит раньше)
+     * @param {HTMLElement} element
+     * @param {number} maxWords
+     * @param {number} [maxChars=500] - максимальная длина в символах
+     * @returns {string}
+     */
+    function getSmartPreview(element, maxWords, maxChars = 500) {
+        const text = element.textContent.trim();
+        const words = text.split(/\s+/);
+
+        let result = words.slice(0, maxWords).join(' ');
+
+        if (result.length > maxChars) {
+            result = result.substring(0, maxChars).trim();
+            const lastSpace = result.lastIndexOf(' ');
+            if (lastSpace > 0) {
+                result = result.substring(0, lastSpace);
+            }
+        }
+
+        if (result.length < text.length) {
+            result += '...';
+        }
+
+        return result;
+    }
+
+    const deleteMessage = (messageId) => {
+        try {
+            fetch('/message/' + messageId, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': JokeForum.getCsrfToken(),
+                    'Content-Type': 'application/json',
+                }
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Ошибка удаления сообщения')
+                }
+            })
+        } catch (error) {
+            console.error('error', error)
+        }
+    }
+
     function init() {
-        const buttons = document.querySelectorAll('.jf-adm-message-edit');
-        buttons.forEach(button => button.addEventListener('click', () => {
+        const buttonsEdit = document.querySelectorAll('.jf-adm-message-edit');
+        buttonsEdit.forEach(button => button.addEventListener('click', () => {
             const messageBox = document.getElementById('message' + button.dataset.id);
             const message = messageBox.querySelector('.forum-message__content').textContent;
             const noteBox = messageBox.querySelector('.forum-message__note');
             const note = noteBox ? messageBox.querySelector('.forum-message__note div').textContent : '';
             showForm(button.dataset.id, message, note)
+        }));
+        const buttonsDelete = document.querySelectorAll('.jf-adm-message-delete');
+        buttonsDelete.forEach(button => button.addEventListener('click', () => {
+            const messageBox = document.getElementById('message' + button.dataset.id);
+            const message = getSmartPreview(messageBox.querySelector('.forum-message__content'), 10);
+            if (!confirm(`Вы действительно хотите удалить сообщение "${message}"?`)) {
+                return;
+            }
+            deleteMessage(button.dataset.id)
         }));
     }
 })(window, document);

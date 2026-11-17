@@ -82,4 +82,16 @@ class MessageRepository
 
         return $result > 0;
     }
+
+    public function deleteMessage(int $id): bool
+    {
+        $result = $this->connection->execute(
+            <<< 'SQL'
+                DELETE FROM forum_messages WHERE id = :message_id
+                SQL,
+            ['message_id' => $id],
+        );
+
+        return $result > 0;
+    }
 }
