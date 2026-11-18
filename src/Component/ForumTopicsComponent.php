@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Vasoft\Joke\Forum\Component;
 
+use Vasoft\Joke\Auth\AuthService;
+use Vasoft\Joke\Auth\Rights\RightsChecker;
+use Vasoft\Joke\Contract\Auth\UserInterface;
 use Vasoft\Joke\Forum\Auth\ForumUserRepository;
 use Vasoft\Joke\Forum\Repository\SectionRepository;
 use Vasoft\Joke\Forum\Repository\TopicRepository;
+use Vasoft\Joke\Http\Response\Html\PageBuilder;
 use Vasoft\Joke\Templator\Component\BaseComponent;
 
 class ForumTopicsComponent extends BaseComponent
@@ -18,12 +22,21 @@ class ForumTopicsComponent extends BaseComponent
      * @var mixed|string
      */
     private mixed $basePath = '';
+    private UserInterface $user;
+    /**
+     * @var false|mixed
+     */
+    private mixed $isSubsection = false;
 
     public function __construct(
         private readonly TopicRepository $topicRepo,
         private readonly ForumUserRepository $forumUserRepo,
         private readonly SectionRepository $sectionRepo,
-    ) {}
+        private readonly RightsChecker $rightsChecker,
+        AuthService $authService,
+    ) {
+        $this->user = $authService->getUser();
+    }
 
     public static function vendor(): string
     {
@@ -41,8 +54,26 @@ class ForumTopicsComponent extends BaseComponent
         $this->page = (int) ($options['page'] ?? 1);
         $this->perPage = (int) ($options['perPage'] ?? 10);
         $this->basePath = $options['basePath'] ?? '';
+        $this->isSubsection = $options['isSubsection'] ?? false;
+
 
         return parent::setOptions($options);
+    }
+
+    protected function beforeRender(PageBuilder $pageBuilder): void
+    {
+        if ($this->userCan('topic.add')) {
+            $js = $this->templateFile('user.js');
+            if (file_exists($js)) {
+                $pageBuilder->js->addToBody($js);
+            }
+        }
+        if ($this->userCan('message.manage')) {
+            $js = $this->templateFile('manager.js');
+            if (file_exists($js)) {
+                $pageBuilder->js->addToBody($js);
+            }
+        }
     }
 
     public function getDefaultTemplatePath(): string
@@ -57,7 +88,7 @@ class ForumTopicsComponent extends BaseComponent
         $topics = $this->topicRepo->getPage($this->sectionId, $offset, $this->perPage);
         $authors = [];
         foreach ($topics as $topic) {
-            if ($topic['user_id'] !== null) {
+            if (null !== $topic['user_id']) {
                 $authors[$topic['user_id']] = false;
             }
         }
@@ -67,7 +98,7 @@ class ForumTopicsComponent extends BaseComponent
         $items = [];
         foreach ($topics as $topic) {
             $date = \DateTime::createFromFormat('Y-m-d H:i:s', $topic['updated_at']);
-            $sectionId = (int)$topic['section_id'];
+            $sectionId = (int) $topic['section_id'];
             if (!array_key_exists($sectionId, $sections)) {
                 continue;
             }
@@ -75,12 +106,15 @@ class ForumTopicsComponent extends BaseComponent
             $items[] = [
                 'new' => false,
                 'name' => $topic['name'],
-                'author' => $topic['user_id'] === null || !isset($authors[$topic['user_id']]) ? ['nickname' => '[Удаленный]', 'blocked' => false] : $authors[$topic['user_id']],
+                'author' => null === $topic['user_id'] || !isset($authors[$topic['user_id']]) ? ['nickname' => '[Удаленный]', 'blocked' => false] : $authors[$topic['user_id']],
                 'updated' => $date->format('Y-m-d H:i'),
                 'messages' => $topic['messages'] - 1,
-                'url' => $sections[$sectionId]['url'].'/'.$topic['id'],
+                'url' => $sections[$sectionId]['url'] . '/' . $topic['id'],
             ];
         }
+
+        $hasNewTopicButton = $this->isSubsection && $this->userCan('topic.add');
+        $hasNewSubButton = !$this->isSubsection && $this->userCan('section.add');
 
         return [
             'topicPagerConfig' => [
@@ -88,7 +122,18 @@ class ForumTopicsComponent extends BaseComponent
                 'page' => $this->page,
                 'baseUrl' => $this->basePath,
             ],
+            'hasNewTopicButton' => $hasNewTopicButton,
+            'hasNewSubButton' => $hasNewSubButton,
+            'hasToolbar' => $hasNewTopicButton || $hasNewSubButton,
+            'sectionId' => $this->sectionId,
             'items' => $items,
         ];
+    }
+
+    private function userCan(string $right): bool
+    {
+        // @todo Роли, имя модуля в отдельный класс (enum)
+        // @todo Сервис проверки прав форума
+        return $this->rightsChecker->can($this->user, 'forum', $right);
     }
 }

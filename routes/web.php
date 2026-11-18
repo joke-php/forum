@@ -57,6 +57,24 @@ $router->put('/message', [Controller::class, 'updateMessage'])
 $router->delete('/message/{id:int}', [Controller::class, 'deleteMessage'])
     ->setDefaultResponseClass(JsonResponse::class)
     ->addMiddleware($managerMiddleware);
+
+
+$router->post('/topic', [Controller::class, 'addTopic'])
+    ->setDefaultResponseClass(JsonResponse::class)
+    ->addMiddleware(
+        static fn(
+            AuthService $authService,
+            RightsChecker $rightsChecker,
+            ResponseBuilder $responseBuilder,
+        ) => new AuthMiddleware(
+            $authService,
+            $rightsChecker,
+            $responseBuilder,
+            ['forum:topic.add'],
+            null,
+        ),
+    );
+
 $router->get('/user/register', [AuthController::class, 'registerForm']);
 $router->post('/user/register', [AuthController::class, 'register']);
 $router->post('/user/login', [AuthController::class, 'auth']);

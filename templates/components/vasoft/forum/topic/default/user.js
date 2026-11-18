@@ -6,7 +6,7 @@
     const formBox = document.getElementById('form-box');
     let formVisible = false;
 
-    const showForm = (topicId) => {
+    const showFormMessage = (topicId) => {
         if (formVisible) {
             document.querySelector('textarea[name=message]').focus();
             return;
@@ -121,9 +121,8 @@
             }
         });
     }
-
     function init() {
-        const buttons = document.querySelectorAll('.jf-new-message');
-        buttons.forEach(button => button.addEventListener('click', () => showForm(button.dataset.topic)));
+        const buttonsNewMessage = document.querySelectorAll('.jf-new-message');
+        buttonsNewMessage.forEach(button => button.addEventListener('click', () => showFormMessage(button.dataset.topic)));
     }
 })(window, document);

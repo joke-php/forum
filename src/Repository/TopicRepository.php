@@ -136,4 +136,42 @@ class TopicRepository
 
         return $result->fetch();
     }
+
+    public function addTopic(int|string|null $id, int $sectionId, string $subject, string $message): int
+    {
+
+        $this->connection->beginTransaction();
+
+        try {
+            $result = $this->connection->execute(
+                <<<'SQL'
+                    INSERT INTO forum_topic ( section_id, name, user_id)
+                    VALUES (:section_id, :name, :user_id);
+                    SQL,
+                ['section_id' => $sectionId, 'name' => $subject, 'user_id' => $id],
+            );
+
+            if (0 === $result) {
+                throw new QueryException('Error adding topic');
+            }
+            $topicId = $this->connection->getLastInsertId();
+            $this->connection->execute(
+                <<<'SQL'
+                    INSERT INTO forum_messages (topic_id, user_id, content)
+                    VALUES (:topic_id, :user_id, :message);
+                    SQL,
+                ['user_id' => $id, 'message' => $message, 'topic_id' => $topicId],
+            );
+
+            $this->connection->commit();
+
+            return (int) $topicId;
+        } catch (\Throwable $e) {
+            if ($this->connection->transactionLevel > 0) {
+                $this->connection->rollBack();
+            }
+
+            throw $e;
+        }
+    }
 }

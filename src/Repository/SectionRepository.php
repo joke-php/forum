@@ -46,6 +46,28 @@ class SectionRepository
     }
 
     /**
+     * @param int $id
+     * @param array $fields
+     * @return array|false
+     * @throws QueryException
+     *
+     * @todo: выработать общий для всех репозиториев подход с проверкой полей
+     */
+    public function getSectionInfoById(int $id, array $fields): array|false
+    {
+        $fieldsList = implode(',', ['id', ...$fields]);
+        $result = $this->connection->query(
+            <<<SQL
+                    SELECT {$fieldsList} FROM forum_section
+                    WHERE id = :id LIMIT 1
+                SQL,
+            ['id' => $id],
+        );
+
+        return $result->fetch();
+    }
+
+    /**
      * @throws QueryException
      */
     public function getSectionIndex(): array|false

@@ -23,6 +23,8 @@ readonly class Controller
 {
     private const int MIN_MESSAGE_LENGTH = 10;
     private const int MAX_MESSAGE_LENGTH = 5000;
+    private const int MIN_SUBJECT_LENGTH = 10;
+    private const int MAX_SUBJECT_LENGTH = 255;
 
     private UserInterface $user;
 
@@ -74,17 +76,11 @@ readonly class Controller
         }
         $response->builder->setTitle($sectionInfo['name'] ?? 'Форум');
 
-        $hasNewTopicButton = '' !== $sub && $this->userCan('topic.add');
-        $hasNewSubButton = '' === $sub && $this->userCan('section.add');
-
         $context = [
-            'forumTopicsConfig' => ['sectionId' => $sectionId, 'basePath' => $this->request->getPath()],
+            'forumTopicsConfig' => ['sectionId' => $sectionId, 'basePath' => $this->request->getPath(), 'isSubsection' => '' !== $sub],
             'sectionMenuConfig' => ['id' => 'sections'],
             'userMenuConfig' => ['id' => 'user'],
             'breadcrumbConfig' => ['id' => 'breadcrumb'],
-            'hasNewTopicButton' => $hasNewTopicButton,
-            'hasNewSubButton' => $hasNewSubButton,
-            'hasToolbar' => $hasNewTopicButton || $hasNewSubButton,
             'needHeader' => '' !== $category || '' !== $sub, // @todo Свойство респонза?
             'notFirstLevel' => null !== $sectionId,
         ];
@@ -215,6 +211,7 @@ readonly class Controller
 
         return $response;
     }
+
     public function deleteMessage(ResponseBuilder $builder, HttpRequest $request, int $id): JsonResponse
     {
         $exists = $this->messageRepo->exists($id);
@@ -227,6 +224,65 @@ readonly class Controller
             $result['success'] = true;
         } else {
             $result['message'] = 'Сообщение отсутствует.';
+        }
+
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+        $response->setBody($result);
+
+        return $response;
+    }
+
+    public function addTopic(ResponseBuilder $builder, HttpRequest $request): JsonResponse
+    {
+        $message = $request->post->getString('message', '');
+        $subject = $request->post->getString('subject', '');
+        $sectionId = $request->post->getInt('sectionId', 0);
+        $message = $this->normalizedMessage($message);
+        $messageLength = mb_strlen($message);
+        $subjectLength = mb_strlen($subject);
+        $result = [
+            'success' => true,
+            'message' => '',
+        ];
+        $answers = [];
+
+        if ($messageLength < self::MIN_MESSAGE_LENGTH || $messageLength > self::MAX_MESSAGE_LENGTH) {
+            $result['success'] = false;
+            $answers[]
+                = $messageLength < self::MIN_MESSAGE_LENGTH
+                ? sprintf('Сообщение слишком короткое. Минимум %d символов.', self::MIN_MESSAGE_LENGTH)
+                : sprintf('Сообщение слишком длинное. Максимум %d символов.', self::MAX_MESSAGE_LENGTH);
+        }
+        if ($subjectLength < self::MIN_SUBJECT_LENGTH || $subjectLength > self::MAX_SUBJECT_LENGTH) {
+            $result['success'] = false;
+            $answers[]
+                = $subjectLength < self::MIN_SUBJECT_LENGTH
+                ? sprintf('Название темы слишком короткое. Минимум %d символов.', self::MIN_SUBJECT_LENGTH)
+                : sprintf('Название темы слишком длинное. Максимум %d символов.', self::MAX_SUBJECT_LENGTH);
+        }
+        $section = $this->sectionRepo->getSectionInfoById($sectionId, ['parent_id', 'slug']);
+        if (false === $section || 0 === (int) $section['parent_id']) {
+            $result['success'] = false;
+            $answers[] = 'Раздел не найден или удален.';
+        }
+
+        if ($result['success']) {
+            try {
+                $result['topicId'] = $this->topicRepo->addTopic((int) $this->user->id, $sectionId, $subject, $message);
+                $parentSection = $this->sectionRepo->getSectionInfoById((int) $section['parent_id'], ['slug']);
+
+                // @todo Получать от роутера
+                $result['topicUrl'] = '/' . $parentSection['slug'] . '/' . $section['slug'] . '/' . $result['topicId'];
+            } catch (\Throwable $e) {
+                $result['success'] = false;
+                $answers[] = 'Ошибка при добавлении темы.' . $e->getMessage();
+                // @todo Сделать нормальную обработку ошибок. сейчас текст ошибки теряется
+            }
+        }
+        if ([] !== $answers) {
+            // @todo Сделать нормальный вывод ошибок
+            $result['message'] = implode('<br>', $answers);
         }
 
         /** @var JsonResponse $response */
