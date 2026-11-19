@@ -112,6 +112,26 @@
             }
         });
     }
+    const deleteTopic = (topicId) => {
+        try {
+            fetch('/topic/' + topicId, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': JokeForum.getCsrfToken(),
+                    'Content-Type': 'application/json',
+                }
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Ошибка удаления темы')
+                }
+            })
+        } catch (error) {
+            console.error('error', error)
+        }
+    }
 
     function init() {
         const buttonsNewTopic = document.querySelectorAll('.jf-adm-topic-edit');
@@ -121,5 +141,19 @@
 
             showFormTopic(button.dataset.id);
         }));
+        const buttonsDelete = document.querySelectorAll('.jf-adm-topic-delete');
+        buttonsDelete.forEach(button => button.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+            const itemSubject = document.querySelector('#topic' + button.dataset.id + ' .topic-title');
+            console.log(itemSubject)
+
+            const message = JokeForum.getSmartPreview(itemSubject, 10);
+            if (!confirm(`Вы действительно хотите удалить тему "${message}"?`)) {
+                return;
+            }
+            deleteTopic(button.dataset.id)
+        }));
+
     }
 })(window, document);

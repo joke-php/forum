@@ -88,7 +88,9 @@ $router->post('/topic', [Controller::class, 'addTopic'])
 $router->put('/topic/{topicId:int}', [Controller::class, 'updateTopic'])
     ->setDefaultResponseClass(JsonResponse::class)
     ->addMiddleware($managerTopicMiddleware);
-
+$router->delete('/topic/{id:int}', [Controller::class, 'deleteTopic'])
+    ->setDefaultResponseClass(JsonResponse::class)
+    ->addMiddleware($managerMiddleware);
 
 $router->get('/user/register', [AuthController::class, 'registerForm']);
 $router->post('/user/register', [AuthController::class, 'register']);

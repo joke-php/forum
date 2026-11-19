@@ -317,4 +317,23 @@ readonly class Controller
         return $response;
     }
 
+    public function deleteTopic(ResponseBuilder $builder, int $id): JsonResponse
+    {
+        $exists = $this->topicRepo->exists($id);
+        $result = [
+            'success' => false
+        ];
+
+        if ($exists) {
+            $result['success'] = $this->topicRepo->delete($id);
+        } else {
+            $result['message'] = 'Тема отсутствует.';
+        }
+
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+        $response->setBody($result);
+
+        return $response;
+    }
 }

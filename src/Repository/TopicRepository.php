@@ -210,4 +210,16 @@ class TopicRepository
         return $result > 0;
     }
 
+    public function delete(int $id): bool
+    {
+        $result = $this->connection->execute(
+            <<< 'SQL'
+                DELETE FROM forum_topic WHERE id = :id
+                SQL,
+            ['id' => $id],
+        );
+
+        return $result > 0;
+    }
+
 }

@@ -287,6 +287,34 @@
             options.afterInit(popup);
         }
     }
+
+    /**
+     * Обрезает текст до N слов или M символов (что наступит раньше)
+     * @param {HTMLElement} element
+     * @param {number} maxWords
+     * @param {number} [maxChars=500] - максимальная длина в символах
+     * @returns {string}
+     */
+    const getSmartPreview  =(element, maxWords, maxChars = 500) => {
+        const text = element.textContent.trim();
+        const words = text.split(/\s+/);
+
+        let result = words.slice(0, maxWords).join(' ');
+
+        if (result.length > maxChars) {
+            result = result.substring(0, maxChars).trim();
+            const lastSpace = result.lastIndexOf(' ');
+            if (lastSpace > 0) {
+                result = result.substring(0, lastSpace);
+            }
+        }
+
+        if (result.length < text.length) {
+            result += '...';
+        }
+
+        return result;
+    }
     if (typeof window.JokeForum === 'undefined') {
         window.JokeForum = {}
     }
@@ -300,5 +328,6 @@
         createTextAreaInput: createTextAreaInput,
         createHidden: createHidden,
         getCsrfToken: getCsrfToken,
+        getSmartPreview: getSmartPreview,
     });
 })(window, document);
