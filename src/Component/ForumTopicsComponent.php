@@ -68,7 +68,7 @@ class ForumTopicsComponent extends BaseComponent
                 $pageBuilder->js->addToBody($js);
             }
         }
-        if ($this->userCan('message.manage')) {
+        if ($this->userCan('topic.manage')) {
             $js = $this->templateFile('manager.js');
             if (file_exists($js)) {
                 $pageBuilder->js->addToBody($js);
@@ -104,6 +104,7 @@ class ForumTopicsComponent extends BaseComponent
             }
 
             $items[] = [
+                'id' => $topic['id'],
                 'new' => false,
                 'name' => $topic['name'],
                 'author' => null === $topic['user_id'] || !isset($authors[$topic['user_id']]) ? ['nickname' => '[Удаленный]', 'blocked' => false] : $authors[$topic['user_id']],
@@ -122,6 +123,7 @@ class ForumTopicsComponent extends BaseComponent
                 'page' => $this->page,
                 'baseUrl' => $this->basePath,
             ],
+            'canManageTopic' => $this->userCan('topic.manage'),
             'hasNewTopicButton' => $hasNewTopicButton,
             'hasNewSubButton' => $hasNewSubButton,
             'hasToolbar' => $hasNewTopicButton || $hasNewSubButton,

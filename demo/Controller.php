@@ -291,4 +291,30 @@ readonly class Controller
 
         return $response;
     }
+
+    public function updateTopic(ResponseBuilder $builder, HttpRequest $request, int $topicId): JsonResponse
+    {
+        $subject = (string) ($request->json['subject'] ?? '');
+        $subject = $this->normalizedMessage($subject);
+        $exists = $this->topicRepo->exists($topicId);
+        $result = [
+            'success' => false,
+        ];
+
+        if ($exists) {
+            $this->topicRepo->update($topicId, [
+                'name' => $subject
+            ]);
+            $result['success'] = true;
+        } else {
+            $result['message'] = 'Тема отсутствует.';
+        }
+
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+        $response->setBody($result);
+
+        return $response;
+    }
+
 }

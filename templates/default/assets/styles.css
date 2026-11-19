@@ -36,15 +36,17 @@
 .forum-message__content {
     padding-top: 8px;
 }
-.forum-message__toolbar{
-    padding-top: 8px;
-    margin-top: 8px;
-    border-top: 1px solid var(--color-border);
+.forum-topic__toolbar,.forum-message__toolbar {
     display: flex;
     gap: 8px;
     align-items: center;
     justify-content: right;
     color: var(--color-text-secondary);
+}
+.forum-message__toolbar{
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid var(--color-border);
 }
 .tool-btn{
     cursor: pointer;

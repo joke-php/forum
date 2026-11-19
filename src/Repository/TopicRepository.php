@@ -155,6 +155,7 @@ class TopicRepository
                 throw new QueryException('Error adding topic');
             }
             $topicId = $this->connection->getLastInsertId();
+            // @todo в контроллер
             $this->connection->execute(
                 <<<'SQL'
                     INSERT INTO forum_messages (topic_id, user_id, content)
@@ -174,4 +175,39 @@ class TopicRepository
             throw $e;
         }
     }
+
+    public function exists(int $topicId): bool
+    {
+        $result = $this->connection->query(
+            <<<'SQL'
+                SELECT id
+                FROM forum_topic
+                WHERE id = :topic_id
+                SQL,
+            [
+                'topic_id' => $topicId,
+            ],
+        );
+
+        return false !== $result->fetch();
+    }
+
+    public function update(int $topicId, array $data): bool
+    {
+        $fields = [];
+        foreach ($data as $key => $value) {
+            $fields[] = "{$key} = :{$key}";
+        }
+        $fields = implode(', ', $fields);
+        $data['topic_id'] = $topicId;
+        $result = $this->connection->execute(
+            <<< SQL
+                UPDATE forum_topic SET {$fields} WHERE id = :topic_id
+                SQL,
+            $data,
+        );
+
+        return $result > 0;
+    }
+
 }

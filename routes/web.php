@@ -27,6 +27,17 @@ $managerMiddleware = static fn(
     ['forum:message.manage'],
     null,
 );
+$managerTopicMiddleware = static fn(
+    AuthService $authService,
+    RightsChecker $rightsChecker,
+    ResponseBuilder $responseBuilder,
+) => new AuthMiddleware(
+    $authService,
+    $rightsChecker,
+    $responseBuilder,
+    ['forum:topic.manage'],
+    null,
+);
 
 /**
  * @var Router $router
@@ -74,6 +85,10 @@ $router->post('/topic', [Controller::class, 'addTopic'])
             null,
         ),
     );
+$router->put('/topic/{topicId:int}', [Controller::class, 'updateTopic'])
+    ->setDefaultResponseClass(JsonResponse::class)
+    ->addMiddleware($managerTopicMiddleware);
+
 
 $router->get('/user/register', [AuthController::class, 'registerForm']);
 $router->post('/user/register', [AuthController::class, 'register']);

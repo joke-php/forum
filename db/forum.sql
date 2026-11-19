@@ -159,3 +159,14 @@ VALUES (@user_role_id, @right_message_add);
 INSERT IGNORE INTO user_role (user_id, role_id)
 SELECT u.id, @user_role_id
 FROM user u;
+
+INSERT IGNORE INTO right_item (name, module, description)
+VALUES ('topic.manage', 'forum', 'Управление темами');
+SET @right_topic_manage = (SELECT id
+                           FROM right_item
+                           WHERE module = 'forum'
+                             AND name = 'topic.manage'
+                           LIMIT 1);
+INSERT IGNORE INTO role_right (role_id, right_id)
+VALUES (@root_role_id, @right_topic_manage);
+
