@@ -132,13 +132,24 @@ class SectionRepository
         $this->connection->beginTransaction();
 
         try {
-            $result = $this->connection->execute(
-                <<<'SQL'
+            if ($parentId > 0) {
+                $result = $this->connection->execute(
+                    <<<'SQL'
                     INSERT INTO forum_section ( parent_id, name, slug, description)
                     VALUES (:parent_id, :name, :slug, :description);
                     SQL,
-                ['parent_id' => $parentId, 'name' => $name, 'slug' => $slug, 'description' => $description],
-            );
+                    ['parent_id' => $parentId, 'name' => $name, 'slug' => $slug, 'description' => $description],
+                );
+            } else {
+                $result = $this->connection->execute(
+                    <<<'SQL'
+                    INSERT INTO forum_section (name, slug, description)
+                    VALUES (:name, :slug, :description);
+                    SQL,
+                    ['name' => $name, 'slug' => $slug, 'description' => $description],
+                );
+            }
+
 
             if (0 === $result) {
                 throw new QueryException('Error adding section');
