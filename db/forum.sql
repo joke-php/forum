@@ -170,3 +170,13 @@ SET @right_topic_manage = (SELECT id
 INSERT IGNORE INTO role_right (role_id, right_id)
 VALUES (@root_role_id, @right_topic_manage);
 
+INSERT IGNORE INTO right_item (name, module, description)
+VALUES ('section.manage', 'forum', 'Управление разделами');
+SET @right_section_manage = (SELECT id
+                           FROM right_item
+                           WHERE module = 'forum'
+                             AND name = 'section.manage'
+                           LIMIT 1);
+INSERT IGNORE INTO role_right (role_id, right_id)
+VALUES (@root_role_id, @right_topic_manage);
+

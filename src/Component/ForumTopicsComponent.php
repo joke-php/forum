@@ -94,6 +94,7 @@ class ForumTopicsComponent extends BaseComponent
         }
         $authors = $this->forumUserRepo->fillUserByIds($authors);
         $sections = $this->sectionRepo->getSectionIndex();
+        $section = $this->sectionId > 0 ? $this->sectionRepo->getSectionInfoById($this->sectionId, ['description']) : [];
 
         $items = [];
         foreach ($topics as $topic) {
@@ -116,6 +117,7 @@ class ForumTopicsComponent extends BaseComponent
 
         $hasNewTopicButton = $this->isSubsection && $this->userCan('topic.add');
         $hasNewSubButton = !$this->isSubsection && $this->userCan('section.add');
+        $manager = $this->sectionId > 0 && $this->userCan('section.manage');
 
         return [
             'topicPagerConfig' => [
@@ -123,10 +125,13 @@ class ForumTopicsComponent extends BaseComponent
                 'page' => $this->page,
                 'baseUrl' => $this->basePath,
             ],
+            'manager' => $manager,
+            'description' => $section['description'] ?? '',
+            'hasDescription' => isset($section['description']) && '' !== $section['description'],
             'canManageTopic' => $this->userCan('topic.manage'),
             'hasNewTopicButton' => $hasNewTopicButton,
             'hasNewSubButton' => $hasNewSubButton,
-            'hasToolbar' => $hasNewTopicButton || $hasNewSubButton,
+            'hasToolbar' => $hasNewTopicButton || $hasNewSubButton || $manager,
             'sectionId' => $this->sectionId,
             'items' => $items,
         ];

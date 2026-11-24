@@ -80,12 +80,23 @@
 }
 
 .side-menu__link {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin: 0;
     padding: 2px 0;
     text-decoration: none;
     color: var(--color-text-primary);
     transition: color 0.4s;
+}
+@media screen and (max-width: 959px) {
+    .side-menu__link:has(.forum-section__toolbar) {
+        margin-right: var(--side-menu-size);
+    }
+}
+.forum-section__toolbar svg{
+    width: 16px;
+    height: 16px;
 }
 
 .side-menu__sub .side-menu__link {

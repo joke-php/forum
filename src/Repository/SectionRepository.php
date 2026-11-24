@@ -46,9 +46,6 @@ class SectionRepository
     }
 
     /**
-     * @param int $id
-     * @param array $fields
-     * @return array|false
      * @throws QueryException
      *
      * @todo: выработать общий для всех репозиториев подход с проверкой полей
@@ -127,5 +124,62 @@ class SectionRepository
         unset($node);
 
         return $tree;
+    }
+
+    public function add(int $parentId, string $name, string $slug, string $description): int
+    {
+
+        $this->connection->beginTransaction();
+
+        try {
+            $result = $this->connection->execute(
+                <<<'SQL'
+                    INSERT INTO forum_section ( parent_id, name, slug, description)
+                    VALUES (:parent_id, :name, :slug, :description);
+                    SQL,
+                ['parent_id' => $parentId, 'name' => $name, 'slug' => $slug, 'description' => $description],
+            );
+
+            if (0 === $result) {
+                throw new QueryException('Error adding section');
+            }
+            $id = (int) $this->connection->getLastInsertId();
+            $this->connection->commit();
+
+            return $id;
+        } catch (\Throwable $e) {
+            if ($this->connection->transactionLevel > 0) {
+                $this->connection->rollBack();
+            }
+
+            throw $e;
+        }
+    }
+
+    public function exists(int $id): bool
+    {
+        $result = $this->connection->query('SELECT id FROM forum_section WHERE id = :id LIMIT 1', ['id' => $id]);
+
+        return false !== $result->fetch();
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        $fields = [];
+        foreach ($data as $key => $value) {
+            $fields[] = "{$key} = :{$key}";
+        }
+        $fields = implode(', ', $fields);
+        $data['id'] = $id;
+        $result = $this->connection->execute("UPDATE forum_section SET {$fields} WHERE id = :topic_id", $data);
+
+        return $result > 0;
+    }
+
+    public function delete(int $id): bool
+    {
+        $result = $this->connection->execute('DELETE FROM forum_section WHERE id = :id', ['id' => $id]);
+
+        return $result > 0;
     }
 }

@@ -331,6 +331,14 @@ main {
     opacity: 0.4;
     cursor: not-allowed;
 }
+.forum-toolbar{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.forum-toolbar__manager{
+    margin-left: auto;
+}
 
 @media screen and (min-width: 960px) {
     .content {

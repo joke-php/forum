@@ -15,7 +15,6 @@ use Vasoft\Joke\Http\Response\ResponseStatus;
 use Vasoft\Joke\Routing\Router;
 use Vasoft\JokeAvatar\Controller\AvatarController;
 
-
 $managerMiddleware = static fn(
     AuthService $authService,
     RightsChecker $rightsChecker,
@@ -38,6 +37,17 @@ $managerTopicMiddleware = static fn(
     ['forum:topic.manage'],
     null,
 );
+$managerSectionMiddleware = static fn(
+    AuthService $authService,
+    RightsChecker $rightsChecker,
+    ResponseBuilder $responseBuilder,
+) => new AuthMiddleware(
+    $authService,
+    $rightsChecker,
+    $responseBuilder,
+    ['forum:section.manage'],
+    null,
+);
 
 /**
  * @var Router $router
@@ -50,25 +60,24 @@ $router->get(
 $router->post('/message', [Controller::class, 'addMessage'])
     ->setDefaultResponseClass(JsonResponse::class)
     ->addMiddleware(
-    static fn(
-        AuthService $authService,
-        RightsChecker $rightsChecker,
-        ResponseBuilder $responseBuilder,
-    ) => new AuthMiddleware(
-        $authService,
-        $rightsChecker,
-        $responseBuilder,
-        ['forum:message.add'],
-        null,
-    ),
-);
+        static fn(
+            AuthService $authService,
+            RightsChecker $rightsChecker,
+            ResponseBuilder $responseBuilder,
+        ) => new AuthMiddleware(
+            $authService,
+            $rightsChecker,
+            $responseBuilder,
+            ['forum:message.add'],
+            null,
+        ),
+    );
 $router->put('/message', [Controller::class, 'updateMessage'])
     ->setDefaultResponseClass(JsonResponse::class)
     ->addMiddleware($managerMiddleware);
 $router->delete('/message/{id:int}', [Controller::class, 'deleteMessage'])
     ->setDefaultResponseClass(JsonResponse::class)
     ->addMiddleware($managerMiddleware);
-
 
 $router->post('/topic', [Controller::class, 'addTopic'])
     ->setDefaultResponseClass(JsonResponse::class)
@@ -91,6 +100,16 @@ $router->put('/topic/{topicId:int}', [Controller::class, 'updateTopic'])
 $router->delete('/topic/{id:int}', [Controller::class, 'deleteTopic'])
     ->setDefaultResponseClass(JsonResponse::class)
     ->addMiddleware($managerMiddleware);
+
+$router->post('/section', [Controller::class, 'addSection'])
+    ->setDefaultResponseClass(JsonResponse::class)
+    ->addMiddleware($managerSectionMiddleware);
+$router->put('/section/{id:int}', [Controller::class, 'updateSection'])
+    ->setDefaultResponseClass(JsonResponse::class)
+    ->addMiddleware($managerSectionMiddleware);
+$router->delete('/section/{id:int}', [Controller::class, 'deleteSection'])
+    ->setDefaultResponseClass(JsonResponse::class)
+    ->addMiddleware($managerSectionMiddleware);
 
 $router->get('/user/register', [AuthController::class, 'registerForm']);
 $router->post('/user/register', [AuthController::class, 'register']);

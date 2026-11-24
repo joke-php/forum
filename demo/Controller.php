@@ -26,6 +26,9 @@ readonly class Controller
     private const int MIN_SUBJECT_LENGTH = 10;
     private const int MAX_SUBJECT_LENGTH = 255;
 
+    private const int MIN_SECTION_NAME_LENGTH = 5;
+    private const int MAX_SECTION_NAME_LENGTH = 100;
+
     private UserInterface $user;
 
     public function __construct(
@@ -75,10 +78,9 @@ readonly class Controller
             $sectionId = (int) $sectionInfo['id'];
         }
         $response->builder->setTitle($sectionInfo['name'] ?? 'Форум');
-
         $context = [
             'forumTopicsConfig' => ['sectionId' => $sectionId, 'basePath' => $this->request->getPath(), 'isSubsection' => '' !== $sub],
-            'sectionMenuConfig' => ['id' => 'sections'],
+            'sectionMenuConfig' => ['id' => 'sections', 'context' => ['manager' => $this->userCan('section.manage')]],
             'userMenuConfig' => ['id' => 'user'],
             'breadcrumbConfig' => ['id' => 'breadcrumb'],
             'needHeader' => '' !== $category || '' !== $sub, // @todo Свойство респонза?
@@ -126,7 +128,7 @@ readonly class Controller
                 'messageCount' => $topicInfo['messages'],
                 'basePath' => $this->request->getPath(),
             ],
-            'sectionMenuConfig' => ['id' => 'sections'],
+            'sectionMenuConfig' => ['id' => 'sections', 'context' => ['manager' => $this->userCan('section.manage')]],
             'userMenuConfig' => ['id' => 'user'],
             'breadcrumbConfig' => ['id' => 'breadcrumb'],
             'hasNewMessageButton' => $hasNewMessageButton,
@@ -303,7 +305,7 @@ readonly class Controller
 
         if ($exists) {
             $this->topicRepo->update($topicId, [
-                'name' => $subject
+                'name' => $subject,
             ]);
             $result['success'] = true;
         } else {
@@ -321,13 +323,117 @@ readonly class Controller
     {
         $exists = $this->topicRepo->exists($id);
         $result = [
-            'success' => false
+            'success' => false,
         ];
 
         if ($exists) {
             $result['success'] = $this->topicRepo->delete($id);
         } else {
             $result['message'] = 'Тема отсутствует.';
+        }
+
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+        $response->setBody($result);
+
+        return $response;
+    }
+
+    public function addSection(ResponseBuilder $builder, HttpRequest $request): JsonResponse
+    {
+        $name = $request->post->getString('name', '');
+        $slug = $request->post->getString('slug', '');
+        $description = $request->post->getString('description', '');
+        $parentId = $request->post->getInt('parentId', 0);
+        $name = $this->normalizedMessage($name);
+        $description = $this->normalizedMessage($description);
+        $length = mb_strlen($name);
+        $result = [
+            'success' => true,
+            'message' => '',
+        ];
+        $answers = [];
+
+        if ($length < self::MIN_SECTION_NAME_LENGTH || $length > self::MAX_SECTION_NAME_LENGTH) {
+            $result['success'] = false;
+            $answers[]
+                = $length < self::MIN_SECTION_NAME_LENGTH
+                ? sprintf('Название раздела слишком короткое. Минимум %d символов.', self::MIN_SECTION_NAME_LENGTH)
+                : sprintf('Название раздела слишком длинное. Максимум %d символов.', self::MAX_SECTION_NAME_LENGTH);
+        }
+        $slugLength = mb_strlen($name);
+        if ($slugLength < self::MIN_SECTION_NAME_LENGTH || $slugLength > self::MAX_SECTION_NAME_LENGTH) {
+            $result['success'] = false;
+            $answers[]
+                = $slugLength < self::MIN_SECTION_NAME_LENGTH
+                ? sprintf('Символьный код слишком короткий. Минимум %d символов.', self::MIN_SECTION_NAME_LENGTH)
+                : sprintf('Символьный код слишком длинный. Максимум %d символов.', self::MAX_SECTION_NAME_LENGTH);
+        }
+        if ($parentId > 0) {
+            $section = $this->sectionRepo->getSectionInfoById($parentId, ['parent_id', 'slug']);
+            if (false === $section || 0 !== (int) $section['parent_id']) {
+                $result['success'] = false;
+                $answers[] = 'Не корректный родительский раздел.';
+            }
+        }
+
+        if ($result['success']) {
+            try {
+                $result['sectionId'] = $this->sectionRepo->add($parentId, $name, $slug, $description);
+            } catch (\Throwable $e) {
+                $result['success'] = false;
+                $answers[] = 'Ошибка при добавлении раздела.' . $e->getMessage();
+                // @todo Сделать нормальную обработку ошибок. сейчас текст ошибки теряется
+            }
+        }
+        if ([] !== $answers) {
+            // @todo Сделать нормальный вывод ошибок
+            $result['message'] = implode('<br>', $answers);
+        }
+
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+        $response->setBody($result);
+
+        return $response;
+    }
+
+    public function updateSection(ResponseBuilder $builder, HttpRequest $request, int $id): JsonResponse
+    {
+        $name = (string) ($request->json['name'] ?? '');
+        $name = $this->normalizedMessage($name);
+        $exists = $this->topicRepo->exists($id);
+        $result = [
+            'success' => false,
+        ];
+
+        if ($exists) {
+            $this->sectionRepo->update($id, [
+                'name' => $name,
+            ]);
+            $result['success'] = true;
+        } else {
+            $result['message'] = 'Раздел отсутствует.';
+        }
+
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+        $response->setBody($result);
+
+        return $response;
+    }
+
+    public function deleteSection(ResponseBuilder $builder, int $id): JsonResponse
+    {
+        $exists = $this->sectionRepo->exists($id);
+        $result = [
+            'success' => false,
+        ];
+
+        if ($exists) {
+            $result['success'] = $this->sectionRepo->delete($id);
+        } else {
+            $result['message'] = 'Раздел отсутствует.';
         }
 
         /** @var JsonResponse $response */

@@ -1,10 +1,19 @@
+{% if hasDescription %}
+<div class="forum-section__description">{{description}}</div>
+{% endif %}
 {% if hasToolbar %}
 <div class="forum-toolbar">
     {% if hasNewSubButton %}
-    <button class="jf-new-sub btn btn_primary">Добавить подраздел</button>
+    <button class="jf-adm-section-add btn btn_primary" data-parent="{{sectionId}}">Добавить подраздел</button>
     {% endif %}
     {% if hasNewTopicButton %}
     <button class="jf-new-topic btn btn_primary" data-section="{{sectionId}}">Добавить тему</button>
+    {% endif %}
+    {% if manager %}
+    <div class="forum-toolbar__manager">
+        <svg class="icon tool-btn jf-adm-section-edit" data-id="{{item.id}}"><use href="#icon-edit"></use></svg>
+        <svg class="icon tool-btn tool-btn_error jf-adm-section-delete" data-id="{{item.id}}"><use href="#icon-delete"></use></svg>
+    </div>
     {% endif %}
 </div>
 {% endif %}
@@ -16,11 +25,11 @@
     <span class="topic-meta">Автор: {{item.author.nickname}} • {{item.updated}}</span>
     <span class="topic-meta">{{item.messages}} ответов</span>
     {% if canManageTopic %}
-    <div class="forum-topic__toolbar">
+    <span class="forum-topic__toolbar">
         <svg class="icon tool-btn jf-adm-topic-edit" data-id="{{item.id}}"><use href="#icon-edit"></use></svg>
         <svg class="icon tool-btn jf-adm-topic-move"><use href="#icon-move"></use></svg>
         <svg class="icon tool-btn tool-btn_error jf-adm-topic-delete" data-id="{{item.id}}"><use href="#icon-delete"></use></svg>
-    </div>
+    </span>
     {% endif %}
 </a>
 {% endforeach %}

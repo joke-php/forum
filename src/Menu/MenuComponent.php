@@ -30,6 +30,7 @@ class MenuComponent extends BaseComponent
      */
     private string $menuName;
     private MenuInterface $entity;
+    private array $extendedContext = [];
 
     public function __construct(
         private readonly MenuManager $manager,
@@ -57,6 +58,9 @@ class MenuComponent extends BaseComponent
         }
         $this->menuName = trim($options['id']);
         $this->entity = $this->manager->get($this->menuName);
+        if (array_key_exists('context', $options) && is_array($options['context'])) {
+            $this->extendedContext = $options['context'];
+        }
 
         return parent::setOptions($options);
     }
@@ -67,7 +71,7 @@ class MenuComponent extends BaseComponent
         $context = $this->entity->getContext();
         $context['items'] = $menu;
 
-        return $context;
+        return array_merge($this->extendedContext, $context);
     }
 
     /**
