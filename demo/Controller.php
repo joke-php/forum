@@ -431,13 +431,15 @@ readonly class Controller
 
     public function deleteSection(ResponseBuilder $builder, int $id): JsonResponse
     {
-        $exists = $this->sectionRepo->exists($id);
+        $exists = $this->sectionRepo->getSectionInfoById($id,['parent_id']);
         $result = [
             'success' => false,
         ];
 
-        if ($exists) {
+        if ($exists !== false) {
             $result['success'] = $this->sectionRepo->delete($id);
+            $parent = $this->sectionRepo->getSectionInfoById($id,['slug']);
+            $result['url'] = '/' . $parent['slug'];
         } else {
             $result['message'] = 'Раздел отсутствует.';
         }

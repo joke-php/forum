@@ -380,7 +380,26 @@
             }
         });
     }
-
+    const deleteSection = (id) => {
+        try {
+            fetch('/section/' + id, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': JokeForum.getCsrfToken(),
+                    'Content-Type': 'application/json',
+                }
+            }).then(response => response.json()).then(data => {
+                if (data.success && data.url) {
+                    window.location.href = data.url;
+                } else {
+                    alert('Ошибка удаления темы')
+                }
+            })
+        } catch (error) {
+            console.error('error', error)
+        }
+    }
     function init() {
         const buttonsNewTopic = document.querySelectorAll('.jf-adm-topic-edit');
         buttonsNewTopic.forEach(button => button.addEventListener('click', event => {
@@ -404,5 +423,15 @@
         buttonsNewSection.forEach(button => button.addEventListener('click', () => formAddSection(button.dataset.parent)));
         const buttonsEditSection = document.querySelectorAll('.jf-adm-section-edit');
         buttonsEditSection.forEach(button => button.addEventListener('click', () => formEditSection(button.dataset.id)));
+        const buttonsDeletesection = document.querySelectorAll('.jf-adm-section-delete');
+        buttonsDeletesection.forEach(button => button.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+            const itemSubject = document.querySelector('h1').textContent;
+            if (!confirm(`Вы действительно хотите удалить раздел "${itemSubject}"?`)) {
+                return;
+            }
+            deleteSection(button.dataset.id)
+        }));
     }
 })(window, document);
