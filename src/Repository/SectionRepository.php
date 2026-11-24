@@ -171,7 +171,7 @@ class SectionRepository
         }
         $fields = implode(', ', $fields);
         $data['id'] = $id;
-        $result = $this->connection->execute("UPDATE forum_section SET {$fields} WHERE id = :topic_id", $data);
+        $result = $this->connection->execute("UPDATE forum_section SET {$fields} WHERE id = :id", $data);
 
         return $result > 0;
     }

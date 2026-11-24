@@ -11,8 +11,8 @@
     {% endif %}
     {% if manager %}
     <div class="forum-toolbar__manager">
-        <svg class="icon tool-btn jf-adm-section-edit" data-id="{{item.id}}"><use href="#icon-edit"></use></svg>
-        <svg class="icon tool-btn tool-btn_error jf-adm-section-delete" data-id="{{item.id}}"><use href="#icon-delete"></use></svg>
+        <svg class="icon tool-btn jf-adm-section-edit" data-id="{{sectionId}}"><use href="#icon-edit"></use></svg>
+        <svg class="icon tool-btn tool-btn_error jf-adm-section-delete" data-id="{{sectionId}}"><use href="#icon-delete"></use></svg>
     </div>
     {% endif %}
 </div>

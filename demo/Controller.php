@@ -401,8 +401,12 @@ readonly class Controller
     public function updateSection(ResponseBuilder $builder, HttpRequest $request, int $id): JsonResponse
     {
         $name = (string) ($request->json['name'] ?? '');
+        $slug = (string) ($request->json['slug'] ?? '');
+        $description = (string) ($request->json['description'] ?? '');
         $name = $this->normalizedMessage($name);
-        $exists = $this->topicRepo->exists($id);
+        $description = $this->normalizedMessage($description);
+
+        $exists = $this->sectionRepo->exists($id);
         $result = [
             'success' => false,
         ];
@@ -410,6 +414,8 @@ readonly class Controller
         if ($exists) {
             $this->sectionRepo->update($id, [
                 'name' => $name,
+                'slug' => $slug,
+                'description' => $description,
             ]);
             $result['success'] = true;
         } else {
