@@ -109,6 +109,8 @@ class ForumTopicComponent extends BaseComponent
             ];
         }
 
+        $isBanned = $this->userCan('message.ban');
+
         return [
             'topicPagerConfig' => [
                 'count' => $this->messageCount,
@@ -117,6 +119,7 @@ class ForumTopicComponent extends BaseComponent
             ],
             'topicId' => $this->topicId,
             'items' => $items,
+            'canUserManage' => $this->userCan('user.manage'),
             'canManage' => $this->userCan('message.manage'),
             'hasNewMessageButton' => $this->userCan('message.add'),
         ];
@@ -124,6 +127,9 @@ class ForumTopicComponent extends BaseComponent
 
     private function userCan(string $right): bool
     {
+        if ($this->user->data->getBool('banned', false)) {
+            return false;
+        }
         // @todo Роли, имя модуля в отдельный класс (enum)
         // @todo Сервис проверки прав форума
         return $this->rightsChecker->can($this->user, 'forum', $right);

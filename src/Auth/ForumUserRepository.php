@@ -11,8 +11,8 @@ use Vasoft\Joke\Container\Exceptions\ParameterResolveException;
 use Vasoft\Joke\Db\Sql\ConnectionManager;
 use Vasoft\Joke\Db\Sql\Contract\ConnectionInterface;
 use Vasoft\Joke\Db\Sql\Exceptions\ConnectionException;
-use Vasoft\Joke\Forum\Auth\Base\AuthRepository;
 use Vasoft\Joke\Db\Sql\Exceptions\QueryException;
+use Vasoft\Joke\Forum\Auth\Base\AuthRepository;
 
 /**
  * Репозиторий для работы с пользователями форума.
@@ -112,7 +112,7 @@ class ForumUserRepository
     {
         $result = $this->connection->query(
             <<<'SQL'
-                    SELECT u.id, u.email, f.nickname, u.last_visit FROM forum_user f
+                    SELECT u.id, u.email, f.nickname, u.last_visit, (u.blocked_to <= NOW() or u.blocked_to IS NULL) as banned,u.blocked_to FROM forum_user f
                                    INNER JOIN user u ON u.id = f.user_id
                                    WHERE u.id = :id and (u.blocked_to <= NOW() or u.blocked_to IS NULL)
                                    LIMIT 1
@@ -126,6 +126,8 @@ class ForumUserRepository
                 'forum_nickname' => $exists['nickname'],
                 'email' => $exists['email'],
                 'last_visit' => $exists['last_visit'],
+                'banned' => 1 === (int) $exists['banned'],
+                'banned_to' => $exists['blocked_to'],
             ]);
 
             return new User((int) $exists['id'], $props);
@@ -210,13 +212,50 @@ class ForumUserRepository
 
         foreach ($queryResult as $user) {
             $users[(int) $user['id']] = [
+                'id' => (int) $user['id'],
                 'nickname' => $user['nickname'],
                 'blocked' => 1 === $user['blocked'],
                 // @todo получать из роута
-                'avatar' => '/avatar/'.urlencode($user['nickname'])
+                'avatar' => '/avatar/' . urlencode($user['nickname']),
             ];
         }
 
         return $users;
+    }
+
+    public function exists(int $id): bool
+    {
+        $result = $this->connection->query(
+            <<<'SQL'
+                SELECT user_id
+                FROM forum_user
+                WHERE user_id = :id
+                SQL,
+            [
+                'id' => $id,
+            ],
+        );
+
+        return false !== $result->fetch();
+    }
+
+    public function block(int $id, \DateTimeImmutable $date): bool
+    {
+        $this->connection->execute(
+            'UPDATE forum_user SET blocked_to = :date where id = :id',
+            ['id' => $id, 'date' => $date->format('Y-m-d H:i:s')],
+        );
+
+        return true;
+    }
+
+    public function unblock(int $id): bool
+    {
+        $this->connection->execute(
+            'UPDATE forum_user SET blocked_to = null where id = :id',
+            ['id' => $id],
+        );
+
+        return true;
     }
 }

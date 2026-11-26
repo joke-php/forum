@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS forum_user
 (
-    user_id  INT UNSIGNED PRIMARY KEY,
-    nickname VARCHAR(255) NOT NULL UNIQUE,
+    user_id    INT UNSIGNED PRIMARY KEY,
+    nickname   VARCHAR(255) NOT NULL UNIQUE,
+    blocked_to DATETIME     NULL,
     FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 );
 
@@ -103,6 +104,8 @@ INSERT IGNORE INTO right_item (name, module, description)
 VALUES ('message.add', 'forum', 'Добавление сообщения');
 INSERT IGNORE INTO right_item (name, module, description)
 VALUES ('message.manage', 'forum', 'Управление сообщениями');
+INSERT IGNORE INTO right_item (name, module, description)
+VALUES ('user.manage', 'forum', 'Управление пользователями');
 
 SET @root_role_id = (SELECT id
                      FROM role
@@ -173,10 +176,18 @@ VALUES (@root_role_id, @right_topic_manage);
 INSERT IGNORE INTO right_item (name, module, description)
 VALUES ('section.manage', 'forum', 'Управление разделами');
 SET @right_section_manage = (SELECT id
-                           FROM right_item
-                           WHERE module = 'forum'
-                             AND name = 'section.manage'
-                           LIMIT 1);
+                             FROM right_item
+                             WHERE module = 'forum'
+                               AND name = 'section.manage'
+                             LIMIT 1);
 INSERT IGNORE INTO role_right (role_id, right_id)
-VALUES (@root_role_id, @right_topic_manage);
+VALUES (@root_role_id, @right_section_manage);
+
+SET @right_user_manage = (SELECT id
+                          FROM right_item
+                          WHERE module = 'forum'
+                            AND name = 'user.manage'
+                          LIMIT 1);
+INSERT IGNORE INTO role_right (role_id, right_id)
+VALUES (@root_role_id, @right_user_manage);
 

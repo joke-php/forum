@@ -56,4 +56,39 @@ class AuthRepository
 
         return (int) $this->connection->getLastInsertId();
     }
+
+    public function exists(int $id): bool
+    {
+        $result = $this->connection->query(
+            <<<'SQL'
+                SELECT id
+                FROM user
+                WHERE id = :id
+                SQL,
+            [
+                'id' => $id,
+            ],
+        );
+
+        return false !== $result->fetch();
+    }
+
+    public function block(int $id, \DateTimeImmutable $date): bool
+    {
+        $this->connection->execute(
+            'UPDATE user SET blocked_to = :date where id = :id',
+            ['id' => $id, 'date' => $date->format('Y-m-d H:i:s')],
+        );
+
+        return true;
+    }
+    public function unblock(int $id): bool
+    {
+        $this->connection->execute(
+            'UPDATE user SET blocked_to = null where id = :id',
+            ['id' => $id],
+        );
+
+        return true;
+    }
 }

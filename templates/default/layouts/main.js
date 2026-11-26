@@ -163,7 +163,15 @@
         el.name = name;
         el.classList.add('form__input');
         if (classes.length) el.classList.add(...classes);
+        // @todo autocomplete через options.attributes.autocomplete
         if (options.autocomplete) el.setAttribute('autocomplete', options.autocomplete);
+        if (options.attributes && typeof options.attributes === 'object') {
+            for (const [attrName, attrValue] of Object.entries(options.attributes)) {
+                if (attrValue !== null && attrValue !== undefined) {
+                    el.setAttribute(attrName, String(attrValue));
+                }
+            }
+        }
 
         const box = document.createElement('label');
         box.classList.add('form__row');

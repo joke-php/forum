@@ -5,10 +5,11 @@
 
     const formBox = document.getElementById('form-box');
     let formVisible = false;
+    let mainInput = null;
 
     const showForm = (messageId, message, note) => {
         if (formVisible) {
-            document.querySelector('textarea[name=message]').focus();
+            mainInput.focus();
             return;
         }
         formVisible = true;
@@ -33,6 +34,7 @@
                 }
             }
         });
+        mainInput = textarea;
 
         const noteBox = JokeForum.createTextAreaInput('note', 'Введите примечание', [], [], {});
         const noteTextarea = noteBox.querySelector('textarea');
@@ -53,7 +55,7 @@
         buttons.appendChild(btn);
         form.appendChild(buttons);
         formBox.appendChild(form);
-        textarea.focus();
+        mainInput.focus();
 
         function validateInput() {
             const length = textarea.value.length;
@@ -131,10 +133,118 @@
             }
         });
     }
+    const showBanForm = (id) => {
+        if (formVisible) {
+            document.querySelector('textarea[name=message]').focus();
+            return;
+        }
+        formVisible = true;
+        const BAN_DAYS = 2;
 
+        const banDate = new Date();
+        banDate.setDate(banDate.getDate() + BAN_DAYS);
+
+        // Форматируем в YYYY-MM-DDTHH:mm (локальное время)
+        const year = banDate.getFullYear();
+        const month = String(banDate.getMonth() + 1).padStart(2, '0');
+        const day = String(banDate.getDate()).padStart(2, '0');
+        const hours = String(banDate.getHours()).padStart(2, '0');
+        const minutes = String(banDate.getMinutes()).padStart(2, '0');
+
+        const formattedDate = `${year}-${month}-${day}`;
+
+
+        const form = document.createElement('form');
+        form.classList.add('form');
+        form.method = 'post';
+        form.action = '/ban';
+        const messages = JokeForum.createEl('div', ['message', 'message_error']);
+        messages.style.display = 'none';
+
+        const date = JokeForum.createTextInput('date', 'date', 'Введите дату окончания блокировки', [], [], {
+            attributes: {
+                required: true,
+                value: formattedDate,
+            }
+        });
+        const dateInput = date.querySelector('input');
+        mainInput = dateInput;
+        const buttons = JokeForum.createEl('div', ['forum-toolbar']);
+        const btn = document.createElement('button');
+
+        btn.textContent = 'Отправить';
+        btn.className = 'btn btn_primary';
+        form.appendChild(messages);
+        form.appendChild(dateInput);
+        buttons.appendChild(btn);
+        form.appendChild(buttons);
+        formBox.appendChild(form);
+        mainInput.focus();
+
+        const showError = (error) => {
+            messages.textContent = error;
+            messages.style.display = 'block';
+        }
+
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            try {
+                const response = await fetch('/ban/' + id, {
+                    method: 'PUT',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-Token': JokeForum.getCsrfToken(),
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        date: dateInput.value+`T${hours}:${minutes}:00`,
+                    }),
+                });
+
+                if (!response.ok && response.status === 403) {
+                    showError('Вы не авторизованы или у вас нет прав');
+                    textarea.focus();
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    showError(data.message);
+                }
+
+            } catch (error) {
+                showError('Произошла ошибка');
+            }
+        });
+    }
+// @todo проверки перенести на customVerification
     const deleteMessage = (messageId) => {
         try {
             fetch('/message/' + messageId, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': JokeForum.getCsrfToken(),
+                    'Content-Type': 'application/json',
+                }
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Ошибка удаления сообщения')
+                }
+            })
+        } catch (error) {
+            console.error('error', error)
+        }
+    }
+    const unbanUser = (id) => {
+        try {
+            fetch('/ban/' + id, {
                 method: 'DELETE',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -170,6 +280,18 @@
                 return;
             }
             deleteMessage(button.dataset.id)
+        }));
+        const buttonsBan = document.querySelectorAll('.jf-adm-user-ban');
+        buttonsBan.forEach(button => button.addEventListener('click', () => {
+            const isBanned = button.classList.contains('tool-btn_success');
+            if (isBanned) {
+                const name = button.closest('.forum-message__author').innerText;
+                if (confirm(`Вы действительно хотите разбанить пользователя "${name}"?`)) {
+                    unbanUser(button.dataset.id)
+                }
+                return;
+            }
+            showBanForm(button.dataset.id)
         }));
     }
 })(window, document);

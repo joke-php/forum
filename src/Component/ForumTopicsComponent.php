@@ -94,7 +94,7 @@ class ForumTopicsComponent extends BaseComponent
         }
         $authors = $this->forumUserRepo->fillUserByIds($authors);
         $sections = $this->sectionRepo->getSectionIndex();
-        $section = $this->sectionId > 0 ? $this->sectionRepo->getSectionInfoById($this->sectionId, ['description','parent_id']) : [];
+        $section = $this->sectionId > 0 ? $this->sectionRepo->getSectionInfoById($this->sectionId, ['description', 'parent_id']) : [];
 
         $items = [];
         foreach ($topics as $topic) {
@@ -134,12 +134,16 @@ class ForumTopicsComponent extends BaseComponent
             'hasToolbar' => $hasNewTopicButton || $hasNewSubButton || $manager,
             'sectionId' => $this->sectionId,
             'items' => $items,
-            'parentId' => (int)$section['parent_id'],
+            'parentId' => (int) $section['parent_id'],
         ];
     }
 
     private function userCan(string $right): bool
     {
+        if ($this->user->data->getBool('banned', false)) {
+            return false;
+        }
+
         // @todo Роли, имя модуля в отдельный класс (enum)
         // @todo Сервис проверки прав форума
         return $this->rightsChecker->can($this->user, 'forum', $right);

@@ -36,5 +36,11 @@ $response->builder->bottomString->add(<<<'HTML'
   <path d="M15.5 2.5l6 6-2.5 2.5-1.5-1.5-4 4 .5 3-1.5 1.5-6-6L8 10.5l3 .5 4-4-1.5-1.5L16 3l-0.5-0.5z"/>
   <path d="M8 16l-5 5"/>
 </symbol>
+<symbol id="icon-ban" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="10"/>
+  <path d="M4.93 4.93l14.14 14.14"/>
+  <circle cx="12" cy="8" r="3"/>
+  <path d="M7 21v-2a5 5 0 0 1 10 0v2"/>
+</symbol>
 </svg>
 HTML);

@@ -10,7 +10,19 @@
              class="forum-message__avatar"
              alt="{{item.author.nickname}}">
         <div>
-            <div class="forum-message__author">{{item.author.nickname}}</div>
+            {% if item.author.blocked %}
+            <div class="forum-message__author forum-message__author_banned">{{item.author.nickname}}
+                {% if canUserManage %}
+                <svg class="icon tool-btn jf-adm-user-ban tool-btn_success" data-id="{{item.author.id}}"><use href="#icon-ban"></use></svg>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="forum-message__author">{{item.author.nickname}}
+                {% if canUserManage %}
+                <svg class="icon tool-btn jf-adm-user-ban tool-btn_error" data-id="{{item.author.id}}"><use href="#icon-ban"></use></svg>
+                {% endif %}
+            </div>
+            {% endif %}
             <div class="forum-message__date">{{item.created}}</div>
         </div>
     </div>

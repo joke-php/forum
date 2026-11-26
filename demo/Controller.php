@@ -7,6 +7,7 @@ namespace Vasoft\Joke\Forum\Demo;
 use Vasoft\Joke\Auth\AuthService;
 use Vasoft\Joke\Auth\Rights\RightsChecker;
 use Vasoft\Joke\Contract\Auth\UserInterface;
+use Vasoft\Joke\Forum\Auth\ForumUserRepository;
 use Vasoft\Joke\Forum\Menu\Breadcrumb;
 use Vasoft\Joke\Forum\Menu\MenuItem;
 use Vasoft\Joke\Forum\Menu\MenuManager;
@@ -431,19 +432,65 @@ readonly class Controller
 
     public function deleteSection(ResponseBuilder $builder, int $id): JsonResponse
     {
-        $exists = $this->sectionRepo->getSectionInfoById($id,['parent_id']);
+        $exists = $this->sectionRepo->getSectionInfoById($id, ['parent_id']);
         $result = [
             'success' => false,
         ];
 
-        if ($exists !== false) {
+        if (false !== $exists) {
             $result['success'] = $this->sectionRepo->delete($id);
-            $parent = $this->sectionRepo->getSectionInfoById($id,['slug']);
+            $parent = $this->sectionRepo->getSectionInfoById($id, ['slug']);
             $result['url'] = '/' . $parent['slug'];
         } else {
             $result['message'] = 'Раздел отсутствует.';
         }
 
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+        $response->setBody($result);
+
+        return $response;
+    }
+
+    public function ban(ResponseBuilder $builder, HttpRequest $request, ForumUserRepository $userRepo, int $id): JsonResponse
+    {
+        $dateValue = (string) ($request->json['date'] ?? '');
+        $result = [
+            'success' => false,
+        ];
+        $error = [];
+        if ('' === $dateValue || ($date = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s', $dateValue)) === false) {
+            $error[] = 'Некорректная дата.';
+        }
+        if (!$userRepo->exists($id)) {
+            $error[] = 'Пользователь отсутствует.';
+        }
+        if ([] === $error) {
+            $userRepo->block($id, $date);
+            $result['success'] = true;
+        } else {
+            $result['message'] = implode('<br>', $error);
+        }
+        /** @var JsonResponse $response */
+        $response = $builder->buildResponse(JsonResponse::class);
+        $response->setBody($result);
+
+        return $response;
+    }
+
+    public function unban(ResponseBuilder $builder, ForumUserRepository $userRepo, int $id): JsonResponse
+    {
+        $result = [
+            'success' => false,
+        ];
+
+        if (!$userRepo->exists($id)) {
+            $result['message'] = 'Пользователь отсутствует.';
+        }
+        if (!isset($result['message'])) {
+            $userRepo->unblock($id);
+            $result['success'] = true;
+        }
         /** @var JsonResponse $response */
         $response = $builder->buildResponse(JsonResponse::class);
         $response->setBody($result);

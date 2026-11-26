@@ -17,7 +17,14 @@
     height: 32px;
     border-radius: 32px;
 }
-
+.forum-message__author{
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+.forum-message__author_banned{
+    text-decoration: line-through;
+}
 .forum-message__date {
     font-size: 0.8rem;
     color: var(--color-text-secondary);
@@ -60,7 +67,12 @@
 .icon.tool-btn_error:hover{
     color: var(--color-error-border);
 }
-
+.icon.tool-btn_success{
+    color: var(--color-success-text);
+}
+.icon.tool-btn_success:hover{
+    color: var(--color-success-border);
+}
 
 .forum-topic {
     border: 1px solid var(--color-border);

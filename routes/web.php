@@ -48,6 +48,17 @@ $managerSectionMiddleware = static fn(
     ['forum:section.manage'],
     null,
 );
+$managerUserMiddleware = static fn(
+    AuthService $authService,
+    RightsChecker $rightsChecker,
+    ResponseBuilder $responseBuilder,
+) => new AuthMiddleware(
+    $authService,
+    $rightsChecker,
+    $responseBuilder,
+    ['forum:user.manage'],
+    null,
+);
 
 /**
  * @var Router $router
@@ -110,6 +121,12 @@ $router->put('/section/{id:int}', [Controller::class, 'updateSection'])
 $router->delete('/section/{id:int}', [Controller::class, 'deleteSection'])
     ->setDefaultResponseClass(JsonResponse::class)
     ->addMiddleware($managerSectionMiddleware);
+$router->put('/ban/{id:int}', [Controller::class, 'ban'])
+    ->setDefaultResponseClass(JsonResponse::class)
+    ->addMiddleware($managerUserMiddleware);
+$router->delete('/ban/{id:int}', [Controller::class, 'unban'])
+    ->setDefaultResponseClass(JsonResponse::class)
+    ->addMiddleware($managerUserMiddleware);
 
 $router->get('/user/register', [AuthController::class, 'registerForm']);
 $router->post('/user/register', [AuthController::class, 'register']);
